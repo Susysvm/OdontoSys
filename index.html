@@ -1,1 +1,992 @@
-Testando sistema do Consultório
+import React, { useState } from 'react';
+import {
+  Calendar,
+  Users,
+  DollarSign,
+  TrendingUp,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
+  Phone,
+  Mail,
+  Search,
+  Filter,
+  Plus,
+  ChevronRight,
+  Sparkles,
+  MessageSquare,
+  Globe,
+  BarChart3,
+  Stethoscope,
+  UserPlus,
+  MousePointer,
+  ArrowUpRight,
+  ArrowDownRight,
+  Eye,
+  RefreshCw,
+  MoreVertical,
+  Check,
+  Zap,
+  Activity,
+  Award
+} from 'lucide-react';
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  PieChart,
+  Pie,
+  Cell,
+  Legend
+} from 'recharts';
+
+const revenueData = [
+  { month: 'Jan', faturamento: 34200, consultas: 98, siteLeads: 45 },
+  { month: 'Fev', faturamento: 38500, consultas: 110, siteLeads: 52 },
+  { month: 'Mar', faturamento: 42000, consultas: 125, siteLeads: 68 },
+  { month: 'Abr', faturamento: 39800, consultas: 118, siteLeads: 60 },
+  { month: 'Mai', faturamento: 46500, consultas: 135, siteLeads: 79 },
+  { month: 'Jun', faturamento: 52100, consultas: 148, siteLeads: 94 },
+  { month: 'Jul', faturamento: 48900, consultas: 142, siteLeads: 88 },
+];
+
+const treatmentsData = [
+  { name: 'Ortodontia (Aparelhos)', value: 35, color: '#0d9488' },
+  { name: 'Implantes & Próteses', value: 25, color: '#0284c7' },
+  { name: 'Limpeza & Profilaxia', value: 20, color: '#6366f1' },
+  { name: 'Clareamento Dental', value: 12, color: '#f59e0b' },
+  { name: 'Endodontia (Canal)', value: 8, color: '#ec4899' },
+];
+
+const acquisitionSources = [
+  { source: 'Google Ads / Busca', visits: 4200, leads: 142, conversion: '3.38%' },
+  { source: 'Instagram Dental Clinic', visits: 3100, leads: 98, conversion: '3.16%' },
+  { source: 'Acesso Direto ao Site', visits: 1800, leads: 44, conversion: '2.44%' },
+  { source: 'Indicação / WhatsApp', visits: 950, leads: 65, conversion: '6.84%' },
+];
+
+const initialAppointments = [
+  {
+    id: 1,
+    patient: 'Ana Beatriz Souza',
+    procedure: 'Manutenção de Aparelho',
+    dentist: 'Dra. Camila Alves',
+    time: '09:00',
+    status: 'confirmado',
+    phone: '(11) 98765-4321',
+    origin: 'Site (Agendamento Direto)',
+    value: 'R$ 220,00',
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150'
+  },
+  {
+    id: 2,
+    patient: 'Carlos Eduardo Lima',
+    procedure: 'Avaliação de Implante',
+    dentist: 'Dr. Roberto Mota',
+    time: '10:30',
+    status: 'em_andamento',
+    phone: '(11) 97654-3210',
+    origin: 'Google Ads',
+    value: 'R$ 3.500,00',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150'
+  },
+  {
+    id: 3,
+    patient: 'Mariana Duarte',
+    procedure: 'Clareamento a Laser',
+    dentist: 'Dra. Camila Alves',
+    time: '13:00',
+    status: 'aguardando',
+    phone: '(11) 91234-5678',
+    origin: 'Instagram',
+    value: 'R$ 850,00',
+    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150'
+  },
+  {
+    id: 4,
+    patient: 'Fernando Santos',
+    procedure: 'Limpeza e Profilaxia',
+    dentist: 'Dr. Juliana Costa',
+    time: '14:30',
+    status: 'confirmado',
+    phone: '(11) 99887-7665',
+    origin: 'Site (Agendamento Direto)',
+    value: 'R$ 250,00',
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150'
+  },
+  {
+    id: 5,
+    patient: 'Patricia Ribeiro',
+    procedure: 'Tratamento de Canal',
+    dentist: 'Dr. Roberto Mota',
+    time: '16:00',
+    status: 'cancelado',
+    phone: '(11) 95544-3322',
+    origin: 'Indicação',
+    value: 'R$ 1.200,00',
+    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150'
+  }
+];
+
+const webLeadsList = [
+  {
+    id: 101,
+    name: 'Lucas Martins',
+    email: 'lucas.m@gmail.com',
+    phone: '(11) 98811-2233',
+    service: 'Alinhadores Invisíveis',
+    date: 'Hoje, 08:24',
+    status: 'Novo'
+  },
+  {
+    id: 102,
+    name: 'Vanessa Ferreira',
+    email: 'vanessa.f@outlook.com',
+    phone: '(11) 97722-3344',
+    service: 'Lentes de Contato Dental',
+    date: 'Hoje, 07:45',
+    status: 'Contatado'
+  },
+  {
+    id: 103,
+    name: 'Rodrigo Barbosa',
+    email: 'rodrigo.b@yahoo.com',
+    phone: '(11) 96633-4455',
+    service: 'Extração do Siso',
+    date: 'Ontem, 19:10',
+    status: 'Agendado'
+  },
+];
+
+export default function App() {
+  const [activeTab, setActiveTab] = useState('overview');
+  const [period, setPeriod] = useState('month');
+  const [appointments, setAppointments] = useState(initialAppointments);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [leads, setLeads] = useState(webLeadsList);
+  const [showNewAppointmentModal, setShowNewAppointmentModal] = useState(false);
+  
+  // New appointment form state
+  const [newPatient, setNewPatient] = useState({
+    patient: '',
+    procedure: 'Limpeza e Profilaxia',
+    dentist: 'Dra. Camila Alves',
+    time: '11:00',
+    phone: '',
+    value: 'R$ 250,00'
+  });
+
+  const handleAddAppointment = (e) => {
+    e.preventDefault();
+    if (!newPatient.patient || !newPatient.phone) return;
+
+    const newItem = {
+      id: Date.now(),
+      patient: newPatient.patient,
+      procedure: newPatient.procedure,
+      dentist: newPatient.dentist,
+      time: newPatient.time,
+      status: 'confirmado',
+      phone: newPatient.phone,
+      origin: 'Painel Manual',
+      value: newPatient.value,
+      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'
+    };
+
+    setAppointments([newItem, ...appointments]);
+    setShowNewAppointmentModal(false);
+    setNewPatient({
+      patient: '',
+      procedure: 'Limpeza e Profilaxia',
+      dentist: 'Dra. Camila Alves',
+      time: '11:00',
+      phone: '',
+      value: 'R$ 250,00'
+    });
+  };
+
+  const handleStatusChange = (id, newStatus) => {
+    setAppointments(
+      appointments.map((apt) => (apt.id === id ? { ...apt, status: newStatus } : apt))
+    );
+  };
+
+  const filteredAppointments = appointments.filter((apt) => {
+    const matchesSearch =
+      apt.patient.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      apt.procedure.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = filterStatus === 'all' || apt.status === filterStatus;
+    return matchesSearch && matchesStatus;
+  });
+
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case 'confirmado':
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Confirmado
+          </span>
+        );
+      case 'em_andamento':
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300">
+            <Clock className="w-3.5 h-3.5 text-blue-600 animate-spin" /> Em Atendimento
+          </span>
+        );
+      case 'aguardando':
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+            <AlertCircle className="w-3.5 h-3.5 text-amber-600" /> Na Recepção
+          </span>
+        );
+      case 'cancelado':
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300">
+            <XCircle className="w-3.5 h-3.5 text-rose-600" /> Cancelado
+          </span>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 font-sans flex flex-col md:flex-row">
+      {/* Sidebar Navigation */}
+      <aside className="w-full md:w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 p-5 flex flex-col justify-between shrink-0">
+        <div>
+          {/* Logo & Brand Header */}
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-500 to-cyan-500 flex items-center justify-center text-white shadow-md shadow-teal-500/20">
+              <Stethoscope className="w-6 h-6" />
+            </div>
+            <div>
+              <h1 className="font-bold text-lg text-slate-900 dark:text-white leading-tight">SmileCare</h1>
+              <p className="text-xs text-teal-600 dark:text-teal-400 font-medium">Gestão & Web Analytics</p>
+            </div>
+          </div>
+
+          {/* Navigation Links */}
+          <nav className="space-y-1">
+            <button
+              onClick={() => setActiveTab('overview')}
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                activeTab === 'overview'
+                  ? 'bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50'
+              }`}
+            >
+              <BarChart3 className="w-4 h-4" />
+              Visão Geral
+            </button>
+
+            <button
+              onClick={() => setActiveTab('appointments')}
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                activeTab === 'appointments'
+                  ? 'bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50'
+              }`}
+            >
+              <Calendar className="w-4 h-4" />
+              Agenda de Hoje
+              <span className="ml-auto bg-teal-100 dark:bg-teal-900 text-teal-800 dark:text-teal-200 text-xs px-2 py-0.5 rounded-full font-bold">
+                {appointments.length}
+              </span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('webleads')}
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                activeTab === 'webleads'
+                  ? 'bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50'
+              }`}
+            >
+              <Globe className="w-4 h-4" />
+              Leads do Site
+              <span className="ml-auto bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200 text-xs px-2 py-0.5 rounded-full font-bold">
+                {leads.length}
+              </span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('treatments')}
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                activeTab === 'treatments'
+                  ? 'bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50'
+              }`}
+            >
+              <Activity className="w-4 h-4" />
+              Tratamentos & Receita
+            </button>
+          </nav>
+        </div>
+
+        {/* Website Performance Quick Widget */}
+        <div className="mt-8 p-4 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-lg">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs text-slate-300 font-medium flex items-center gap-1">
+              <Zap className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+              Performance Web
+            </span>
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">
+              Online
+            </span>
+          </div>
+          <p className="text-xl font-bold">98.4%</p>
+          <p className="text-xs text-slate-400 mt-1">Taxa de resposta rápida aos agendamentos</p>
+          <button 
+            onClick={() => window.open('#', '_blank')}
+            className="w-full mt-3 py-1.5 bg-teal-500 hover:bg-teal-600 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition"
+          >
+            <Eye className="w-3.5 h-3.5" />
+            Ver Site AO VIVO
+          </button>
+        </div>
+      </aside>
+
+      {/* Main Content Area */}
+      <main className="flex-1 p-4 md:p-8 overflow-y-auto max-w-7xl mx-auto w-full space-y-6">
+        {/* Top Header Bar */}
+        <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+          <div>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              Olá, Dr. Gabriel
+              <Sparkles className="w-5 h-5 text-amber-500 fill-amber-500" />
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Acompanhe o desempenho do site e a movimentação do seu consultório hoje.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {/* Period Selector */}
+            <div className="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-xl text-xs font-medium border border-slate-200 dark:border-slate-700">
+              <button
+                onClick={() => setPeriod('week')}
+                className={`px-3 py-1.5 rounded-lg transition ${
+                  period === 'week' ? 'bg-white dark:bg-slate-800 text-teal-600 shadow-sm font-semibold' : 'text-slate-600 dark:text-slate-400'
+                }`}
+              >
+                7 Dias
+              </button>
+              <button
+                onClick={() => setPeriod('month')}
+                className={`px-3 py-1.5 rounded-lg transition ${
+                  period === 'month' ? 'bg-white dark:bg-slate-800 text-teal-600 shadow-sm font-semibold' : 'text-slate-600 dark:text-slate-400'
+                }`}
+              >
+                Este Mês
+              </button>
+              <button
+                onClick={() => setPeriod('year')}
+                className={`px-3 py-1.5 rounded-lg transition ${
+                  period === 'year' ? 'bg-white dark:bg-slate-800 text-teal-600 shadow-sm font-semibold' : 'text-slate-600 dark:text-slate-400'
+                }`}
+              >
+                Ano
+              </button>
+            </div>
+
+            {/* Quick Action Button */}
+            <button
+              onClick={() => setShowNewAppointmentModal(true)}
+              className="bg-teal-600 hover:bg-teal-700 active:scale-95 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 shadow-sm shadow-teal-600/30 transition-all"
+            >
+              <Plus className="w-4 h-4" />
+              Novo Agendamento
+            </button>
+          </div>
+        </header>
+
+        {}
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Card 1: Faturamento */}
+          <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition">
+            <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-3">
+              <span className="text-xs font-semibold uppercase tracking-wider">Faturamento do Mês</span>
+              <div className="w-9 h-9 rounded-xl bg-teal-50 dark:bg-teal-950/80 text-teal-600 flex items-center justify-center">
+                <DollarSign className="w-5 h-5" />
+              </div>
+            </div>
+            <div className="flex items-baseline justify-between">
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white">R$ 48.900</h3>
+              <span className="flex items-center text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md">
+                <ArrowUpRight className="w-3.5 h-3.5 mr-0.5" /> +12.4%
+              </span>
+            </div>
+            <p className="text-xs text-slate-400 mt-2">Vs. R$ 43.500 no mês passado</p>
+          </div>
+
+          {/* Card 2: Agendamentos via Site */}
+          <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition">
+            <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-3">
+              <span className="text-xs font-semibold uppercase tracking-wider">Agendamentos On-line</span>
+              <div className="w-9 h-9 rounded-xl bg-cyan-50 dark:bg-cyan-950/80 text-cyan-600 flex items-center justify-center">
+                <Globe className="w-5 h-5" />
+              </div>
+            </div>
+            <div className="flex items-baseline justify-between">
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white">88</h3>
+              <span className="flex items-center text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md">
+                <ArrowUpRight className="w-3.5 h-3.5 mr-0.5" /> +18.2%
+              </span>
+            </div>
+            <p className="text-xs text-slate-400 mt-2">62% do total de agendamentos</p>
+          </div>
+
+          {/* Card 3: Novos Pacientes */}
+          <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition">
+            <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-3">
+              <span className="text-xs font-semibold uppercase tracking-wider">Novos Pacientes</span>
+              <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 flex items-center justify-center">
+                <UserPlus className="w-5 h-5" />
+              </div>
+            </div>
+            <div className="flex items-baseline justify-between">
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white">38</h3>
+              <span className="flex items-center text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md">
+                <ArrowUpRight className="w-3.5 h-3.5 mr-0.5" /> +8.5%
+              </span>
+            </div>
+            <p className="text-xs text-slate-400 mt-2">Primeira consulta agendada</p>
+          </div>
+
+          {/* Card 4: Taxa de Conversão do Site */}
+          <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition">
+            <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-3">
+              <span className="text-xs font-semibold uppercase tracking-wider">Conversão do Site</span>
+              <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/80 text-amber-600 flex items-center justify-center">
+                <MousePointer className="w-5 h-5" />
+              </div>
+            </div>
+            <div className="flex items-baseline justify-between">
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white">3.8%</h3>
+              <span className="flex items-center text-xs font-semibold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/60 px-2 py-0.5 rounded-md">
+                <ArrowDownRight className="w-3.5 h-3.5 mr-0.5" /> -0.4%
+              </span>
+            </div>
+            <p className="text-xs text-slate-400 mt-2">Visitantes que marcaram consulta</p>
+          </div>
+        </section>
+
+        {}
+        {(activeTab === 'overview' || activeTab === 'treatments') && (
+          <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Main Area Chart: Receita vs Agendamentos do Site */}
+            <div className="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-2">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-teal-600" />
+                    Crescimento de Faturamento & Agendamentos
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Evolução do faturamento total e agendamentos vindos diretamente do site.
+                  </p>
+                </div>
+                <div className="flex items-center gap-4 text-xs font-medium">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-3 h-3 rounded-full bg-teal-500 inline-block"></span>
+                    <span>Faturamento (R$)</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-3 h-3 rounded-full bg-cyan-400 inline-block"></span>
+                    <span>Leads do Site</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="h-72 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={revenueData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorFaturamento" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#0d9488" stopOpacity={0.4} />
+                        <stop offset="95%" stopColor="#0d9488" stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="colorLeads" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#22d3ee" stopOpacity={0.4} />
+                        <stop offset="95%" stopColor="#22d3ee" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                    <XAxis dataKey="month" stroke="#94a3b8" fontSize={12} tickLine={false} />
+                    <YAxis yAxisId="left" stroke="#94a3b8" fontSize={12} tickLine={false} />
+                    <YAxis yAxisId="right" orientation="right" stroke="#94a3b8" fontSize={12} tickLine={false} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#1e293b',
+                        borderRadius: '12px',
+                        border: 'none',
+                        color: '#fff',
+                        fontSize: '12px'
+                      }}
+                    />
+                    <Area
+                      yAxisId="left"
+                      type="monotone"
+                      dataKey="faturamento"
+                      stroke="#0d9488"
+                      strokeWidth={3}
+                      fillOpacity={1}
+                      fill="url(#colorFaturamento)"
+                      name="Faturamento (R$)"
+                    />
+                    <Area
+                      yAxisId="right"
+                      type="monotone"
+                      dataKey="siteLeads"
+                      stroke="#22d3ee"
+                      strokeWidth={2}
+                      fillOpacity={1}
+                      fill="url(#colorLeads)"
+                      name="Leads Web"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Pie Chart: Distribuição dos Tratamentos */}
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between">
+              <div>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-1">
+                  <Activity className="w-5 h-5 text-indigo-600" />
+                  Tratamentos Mais Procurados
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
+                  Distribuição por demanda recebida no site.
+                </p>
+              </div>
+
+              <div className="h-56 w-full relative flex items-center justify-center">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={treatmentsData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={55}
+                      outerRadius={80}
+                      paddingAngle={4}
+                      dataKey="value"
+                    >
+                      {treatmentsData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#1e293b',
+                        borderRadius: '8px',
+                        color: '#fff',
+                        fontSize: '12px'
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div className="space-y-2 mt-2">
+                {treatmentsData.map((item, idx) => (
+                  <div key={idx} className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }}></span>
+                      <span className="text-slate-600 dark:text-slate-300 font-medium">{item.name}</span>
+                    </div>
+                    <span className="font-bold text-slate-800 dark:text-white">{item.value}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {}
+        {(activeTab === 'overview' || activeTab === 'appointments') && (
+          <section className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-teal-600" />
+                  Atendimentos e Agenda de Hoje
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Gerencie o fluxo de pacientes do dia em tempo real.
+                </p>
+              </div>
+
+              {/* Filters & Search */}
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="relative flex-1 sm:w-64">
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Buscar paciente ou procedimento..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  />
+                </div>
+
+                <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900 p-1 rounded-xl text-xs">
+                  <button
+                    onClick={() => setFilterStatus('all')}
+                    className={`px-2.5 py-1 rounded-lg font-medium transition ${
+                      filterStatus === 'all' ? 'bg-white dark:bg-slate-800 shadow text-slate-900 dark:text-white' : 'text-slate-500'
+                    }`}
+                  >
+                    Todos
+                  </button>
+                  <button
+                    onClick={() => setFilterStatus('confirmado')}
+                    className={`px-2.5 py-1 rounded-lg font-medium transition ${
+                      filterStatus === 'confirmado' ? 'bg-white dark:bg-slate-800 shadow text-emerald-600' : 'text-slate-500'
+                    }`}
+                  >
+                    Confirmados
+                  </button>
+                  <button
+                    onClick={() => setFilterStatus('em_andamento')}
+                    className={`px-2.5 py-1 rounded-lg font-medium transition ${
+                      filterStatus === 'em_andamento' ? 'bg-white dark:bg-slate-800 shadow text-blue-600' : 'text-slate-500'
+                    }`}
+                  >
+                    Em Sala
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Appointments Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-400 text-xs font-semibold uppercase tracking-wider">
+                    <th className="pb-3 px-2">Horário</th>
+                    <th className="pb-3 px-2">Paciente</th>
+                    <th className="pb-3 px-2">Procedimento</th>
+                    <th className="pb-3 px-2">Dentista Responsável</th>
+                    <th className="pb-3 px-2">Origem do Agendamento</th>
+                    <th className="pb-3 px-2">Status</th>
+                    <th className="pb-3 px-2 text-right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50 text-sm">
+                  {filteredAppointments.length > 0 ? (
+                    filteredAppointments.map((apt) => (
+                      <tr key={apt.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition">
+                        <td className="py-4 px-2 font-bold text-slate-900 dark:text-white whitespace-nowrap">
+                          {apt.time}
+                        </td>
+                        <td className="py-4 px-2">
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={apt.avatar}
+                              alt={apt.patient}
+                              className="w-9 h-9 rounded-full object-cover border border-slate-200 dark:border-slate-700"
+                            />
+                            <div>
+                              <p className="font-semibold text-slate-900 dark:text-white leading-tight">
+                                {apt.patient}
+                              </p>
+                              <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
+                                <Phone className="w-3 h-3" /> {apt.phone}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-4 px-2 font-medium text-slate-700 dark:text-slate-300">
+                          {apt.procedure}
+                          <span className="block text-xs font-normal text-teal-600 dark:text-teal-400">{apt.value}</span>
+                        </td>
+                        <td className="py-4 px-2 text-xs text-slate-600 dark:text-slate-400">
+                          {apt.dentist}
+                        </td>
+                        <td className="py-4 px-2">
+                          <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 font-medium">
+                            {apt.origin.includes('Site') ? <Globe className="w-3 h-3 text-cyan-500" /> : <Users className="w-3 h-3 text-slate-400" />}
+                            {apt.origin}
+                          </span>
+                        </td>
+                        <td className="py-4 px-2">{getStatusBadge(apt.status)}</td>
+                        <td className="py-4 px-2 text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              title="Marcar como em atendimento"
+                              onClick={() => handleStatusChange(apt.id, 'em_andamento')}
+                              className="p-1.5 hover:bg-blue-50 dark:hover:bg-blue-950 text-blue-600 rounded-lg transition"
+                            >
+                              <Clock className="w-4 h-4" />
+                            </button>
+                            <button
+                              title="Concluir/Confirmar"
+                              onClick={() => handleStatusChange(apt.id, 'confirmado')}
+                              className="p-1.5 hover:bg-emerald-50 dark:hover:bg-emerald-950 text-emerald-600 rounded-lg transition"
+                            >
+                              <Check className="w-4 h-4" />
+                            </button>
+                            <button
+                              title="Enviar Lembrete WhatsApp"
+                              onClick={() => alert(`Lembrete enviado via WhatsApp para ${apt.patient}!`)}
+                              className="p-1.5 hover:bg-teal-50 dark:hover:bg-teal-950 text-teal-600 rounded-lg transition"
+                            >
+                              <MessageSquare className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="7" className="text-center py-8 text-slate-400 text-sm">
+                        Nenhum agendamento encontrado para essa busca.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
+
+        {}
+        {(activeTab === 'overview' || activeTab === 'webleads') && (
+          <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Table of Website Leads */}
+            <div className="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <Globe className="w-5 h-5 text-cyan-600" />
+                    Solicitações de Agendamento Recebidas no Site
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Pacientes que preencheram o formulário de contato do seu site recentemente.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {leads.map((lead) => (
+                  <div
+                    key={lead.id}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-700/60 bg-slate-50/50 dark:bg-slate-900/40 hover:border-teal-200 dark:hover:border-teal-800 transition gap-3"
+                  >
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-slate-900 dark:text-white text-sm">{lead.name}</span>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-cyan-100 text-cyan-800 dark:bg-cyan-950 dark:text-cyan-300">
+                          {lead.service}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+                        <span className="flex items-center gap-1">
+                          <Mail className="w-3 h-3" /> {lead.email}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Phone className="w-3 h-3" /> {lead.phone}
+                        </span>
+                        <span className="flex items-center gap-1 text-slate-400">
+                          <Clock className="w-3 h-3" /> {lead.date}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 self-end sm:self-center">
+                      <button
+                        onClick={() => alert(`Iniciando atendimento via WhatsApp com ${lead.name}...`)}
+                        className="px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition shadow-sm"
+                      >
+                        <MessageSquare className="w-3.5 h-3.5" />
+                        Atender no WhatsApp
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Traffic Source Breakdown */}
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between">
+              <div>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-1">
+                  <BarChart3 className="w-5 h-5 text-teal-600" />
+                  Origem do Tráfego do Site
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
+                  De onde vêm os pacientes que acessam seu consultório.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                {acquisitionSources.map((item, idx) => (
+                  <div key={idx} className="space-y-1">
+                    <div className="flex items-center justify-between text-xs font-medium">
+                      <span className="text-slate-800 dark:text-slate-200">{item.source}</span>
+                      <span className="text-teal-600 dark:text-teal-400 font-bold">{item.leads} agendamentos</span>
+                    </div>
+                    <div className="w-full h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-teal-500 to-cyan-500 rounded-full"
+                        style={{ width: `${(item.leads / 150) * 100}%` }}
+                      ></div>
+                    </div>
+                    <div className="flex items-center justify-between text-[11px] text-slate-400 pt-0.5">
+                      <span>{item.visits} visitas</span>
+                      <span>Taxa Conv: {item.conversion}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 p-3 rounded-xl bg-teal-50 dark:bg-teal-950/50 border border-teal-100 dark:border-teal-900/50 text-xs text-teal-800 dark:text-teal-300 flex items-start gap-2">
+                <Award className="w-4 h-4 shrink-0 mt-0.5 text-teal-600" />
+                <p>
+                  <strong>Dica de Marketing:</strong> O canal <strong>Indicação / WhatsApp</strong> apresenta a maior taxa de conversão (6.84%). Considere disparar pesquisas de satisfação pós-consulta.
+                </p>
+              </div>
+            </div>
+          </section>
+        )}
+      </main>
+
+      {}
+      {showNewAppointmentModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-teal-600" />
+                Agendar Nova Consulta
+              </h3>
+              <button
+                onClick={() => setShowNewAppointmentModal(false)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1"
+              >
+                <XCircle className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddAppointment} className="space-y-4 text-xs">
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Nome do Paciente *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ex: João da Silva"
+                  value={newPatient.patient}
+                  onChange={(e) => setNewPatient({ ...newPatient, patient: e.target.value })}
+                  className="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Telefone / WhatsApp *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="(11) 99999-9999"
+                  value={newPatient.phone}
+                  onChange={(e) => setNewPatient({ ...newPatient, phone: e.target.value })}
+                  className="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    Procedimento
+                  </label>
+                  <select
+                    value={newPatient.procedure}
+                    onChange={(e) => setNewPatient({ ...newPatient, procedure: e.target.value })}
+                    className="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-xs"
+                  >
+                    <option>Limpeza e Profilaxia</option>
+                    <option>Manutenção Ortodôntica</option>
+                    <option>Avaliação de Implante</option>
+                    <option>Clareamento Dental</option>
+                    <option>Restauração / Estética</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    Horário
+                  </label>
+                  <input
+                    type="time"
+                    value={newPatient.time}
+                    onChange={(e) => setNewPatient({ ...newPatient, time: e.target.value })}
+                    className="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    Dentista Responsável
+                  </label>
+                  <select
+                    value={newPatient.dentist}
+                    onChange={(e) => setNewPatient({ ...newPatient, dentist: e.target.value })}
+                    className="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-xs"
+                  >
+                    <option>Dra. Camila Alves</option>
+                    <option>Dr. Roberto Mota</option>
+                    <option>Dr. Juliana Costa</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    Valor Estimado (R$)
+                  </label>
+                  <input
+                    type="text"
+                    value={newPatient.value}
+                    onChange={(e) => setNewPatient({ ...newPatient, value: e.target.value })}
+                    className="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+                <button
+                  type="button"
+                  onClick={() => setShowNewAppointmentModal(false)}
+                  className="px-4 py-2 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 font-semibold"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-semibold shadow-md shadow-teal-600/30"
+                >
+                  Confirmar Agendamento
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

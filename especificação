@@ -1,0 +1,66 @@
+# Especificação (Spec)
+
+**Nome do projeto:** OdontoSys
+
+**Problema que resolve:** Centralizar a gestão de um consultório odontológico em um único sistema, permitindo cadastro de pacientes, prontuário eletrônico completo, armazenamento de documentos, controle financeiro, agenda, estoque e geração de relatórios.
+
+**Público:** Consultório Odontológico Dra. Aline Martins, cirurgiões-dentistas, auxiliares, recepcionistas, administradores e pacientes.
+
+**O site em uma frase:** O OdontoSys é um sistema web para gerenciamento completo de consultórios odontológicos, integrando atendimento clínico, prontuário eletrônico, agenda, financeiro e comunicação com pacientes.
+
+**Seções do site:**
+
+* Dashboard
+* Cadastro de Pacientes
+* Dados Clínicos
+* Anamnese Inteligente
+* Prontuário Eletrônico
+* Odontograma Interativo
+* Plano de Tratamento
+* Agenda
+* Financeiro
+* Contas a Pagar
+* Fluxo de Caixa
+* Estoque
+* Prescrição
+* Galeria Clínica
+* Relatórios
+* Usuários
+* Comunicação
+* Configurações
+
+**Recursos do sistema:**
+
+* Cadastro completo de pacientes
+* Anexar documentos
+* Armazenar fotografias clínicas
+* Armazenar radiografias
+* Armazenar tomografias
+* Armazenar exames laboratoriais
+* Histórico de atendimentos
+* Evolução clínica
+* Assinatura digital de documentos
+* Emissão de receitas e atestados
+* Controle financeiro
+* Controle de pagamentos e recebimentos
+* Controle de estoque
+* Agenda de consultas
+* Relatórios gerenciais
+* Controle de usuários e permissões
+* Backup dos dados
+* Comunicação automática com pacientes
+
+**Ação principal:** Automatizar o prontuário eletrônico dos pacientes e integrar todos os processos administrativos e clínicos do consultório odontológico em uma única plataforma.
+
+**Identidade visual:** Interface moderna, acolhedora e intuitiva, utilizando cores alegres voltadas ao público infantil (tons de azul, verde, amarelo e laranja), ícones ilustrativos, elementos amigáveis e design responsivo para computador, tablet e celular.
+
+**Contato:**
+
+* WhatsApp
+* SMS
+* E-mail
+* Lembretes automáticos de consulta
+* Lembretes de retorno
+* Notificações de tratamento
+
+A spec está bem estruturada. Para torná-la ainda mais robusta para o desenvolvimento do sistema, eu acrescentaria módulos como **assinatura eletrônica de termos de consentimento, LGPD (controle de consentimento do paciente), integração com PIX e cartão, emissão de notas fiscais, backup automático em nuvem, painel com indicadores (KPIs), autenticação em dois fatores e controle de permissões por perfil de usuário**. Esses recursos costumam agregar bastante valor a um prontuário eletrônico odontológico.

@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full bg-gray-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OdontoSys - Cadastro de Paciente</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Inter & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .input-focus { transition: all 0.3s ease; }
+        .input-focus:focus { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+        .glass-panel { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); }
+        .spinner { border: 3px solid rgba(0, 0, 0, 0.1); border-radius: 50%; border-top: 3px solid #0d9488; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="h-full flex flex-col text-gray-800 bg-gradient-to-br from-slate-900 via-slate-800 to-teal-900">
+
+    <!-- Header -->
+    <header class="bg-slate-900/80 text-white shadow-xl border-b border-teal-500/20 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-teal-500 text-slate-900 p-2 rounded-xl font-bold flex items-center justify-center shadow-lg">
+                    <i class="fa-solid fa-tooth text-xl"></i>
+                </div>
+                <div>
+                    <span class="text-lg font-bold tracking-tight">OdontoSys</span>
+                    <span class="block text-xs text-teal-400 font-medium">Cadastro de Pacientes</span>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <!-- Status API -->
+                <div id="api-status" class="flex items-center space-x-2 bg-slate-800/80 px-4 py-2 rounded-full text-xs font-medium border border-slate-700">
+                    <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+                    <span id="status-text">Conectando...</span>
+                </div>
+                <a href="index.html" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-4 py-2 rounded-xl text-sm font-semibold transition border border-slate-600 flex items-center space-x-2">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Voltar</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex items-center justify-center p-4 sm:p-8">
+        <div class="w-full max-w-2xl">
+            
+            <!-- Form Card -->
+            <div class="glass-panel rounded-3xl border border-slate-700/50 shadow-2xl p-8 sm:p-10 space-y-8">
+                
+                <!-- Title -->
+                <div class="text-center space-y-2">
+                    <h1 class="text-3xl sm:text-4xl font-bold text-white flex items-center justify-center space-x-3">
+                        <i class="fa-solid fa-user-plus text-teal-400"></i>
+                        <span>Novo Paciente</span>
+                    </h1>
+                    <p class="text-gray-300 text-sm">Preencha os dados abaixo para cadastrar um novo paciente no sistema</p>
+                </div>
+
+                <!-- Form -->
+                <form id="formCadastroPaciente" class="space-y-6">
+                    
+                    <!-- Seção 1: Dados Pessoais -->
+                    <div class="bg-slate-800/50 rounded-2xl p-6 border border-slate-700/50 space-y-4">
+                        <h2 class="text-lg font-bold text-teal-400 flex items-center space-x-2">
+                            <i class="fa-solid fa-user"></i>
+                            <span>Dados Pessoais</span>
+                        </h2>
+
+                        <!-- Nome -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-300 mb-2">
+                                <i class="fa-solid fa-name mr-2 text-teal-400"></i>Nome Completo *
+                            </label>
+                            <input 
+                                type="text" 
+                                id="nome" 
+                                placeholder="Ex: Maria Silva dos Santos"
+                                class="input-focus w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-gray-500 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                                required
+                            >
+                            <p class="text-xs text-gray-400 mt-1">Mínimo 3 caracteres</p>
+                        </div>
+
+                        <!-- Email -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-300 mb-2">
+                                <i class="fa-solid fa-envelope mr-2 text-teal-400"></i>Email *
+                            </label>
+                            <input 
+                                type="email" 
+                                id="email" 
+                                placeholder="exemplo@email.com"
+                                class="input-focus w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-gray-500 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                                required
+                            >
+                            <p class="text-xs text-gray-400 mt-1">Email válido para contato</p>
+                        </div>
+
+                        <!-- CPF -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-300 mb-2">
+                                <i class="fa-solid fa-id-card mr-2 text-teal-400"></i>CPF
+                            </label>
+                            <input 
+                                type="text" 
+                                id="cpf" 
+                                placeholder="000.000.000-00"
+                                class="input-focus w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-gray-500 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                                maxlength="14"
+                            >
+                            <p class="text-xs text-gray-400 mt-1">Formato: XXX.XXX.XXX-XX</p>
+                        </div>
+
+                        <!-- Telefone -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-300 mb-2">
+                                <i class="fa-solid fa-phone mr-2 text-teal-400"></i>Telefone *
+                            </label>
+                            <input 
+                                type="tel" 
+                                id="telefone" 
+                                placeholder="(11) 99999-9999"
+                                class="input-focus w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-gray-500 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                                maxlength="15"
+                                required
+                            >
+                            <p class="text-xs text-gray-400 mt-1">Celular ou fixo com DDD</p>
+                        </div>
+
+                        <!-- Data de Nascimento -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-300 mb-2">
+                                <i class="fa-solid fa-calendar mr-2 text-teal-400"></i>Data de Nascimento
+                            </label>
+                            <input 
+                                type="date" 
+                                id="dataNascimento"
+                                class="input-focus w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Seção 2: Endereço -->
+                    <div class="bg-slate-800/50 rounded-2xl p-6 border border-slate-700/50 space-y-4">
+                        <h2 class="text-lg font-bold text-teal-400 flex items-center space-x-2">
+                            <i class="fa-solid fa-map-location-dot"></i>
+                            <span>Endereço</span>
+                        </h2>
+
+                        <!-- Rua -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-300 mb-2">
+                                <i class="fa-solid fa-road mr-2 text-teal-400"></i>Rua/Avenida
+                            </label>
+                            <input 
+                                type="text" 
+                                id="endereco" 
+                                placeholder="Ex: Rua das Flores"
+                                class="input-focus w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-gray-500 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                            >
+                        </div>
+
+                        <!-- Cidade e Estado -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-300 mb-2">
+                                    <i class="fa-solid fa-city mr-2 text-teal-400"></i>Cidade
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="cidade" 
+                                    placeholder="São Paulo"
+                                    class="input-focus w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-gray-500 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                                >
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-300 mb-2">
+                                    <i class="fa-solid fa-flag mr-2 text-teal-400"></i>Estado
+                                </label>
+                                <select id="estado" class="input-focus w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20">
+                                    <option value="">Selecione...</option>
+                                    <option value="SP">São Paulo</option>
+                                    <option value="RJ">Rio de Janeiro</option>
+                                    <option value="MG">Minas Gerais</option>
+                                    <option value="BA">Bahia</option>
+                                    <option value="RS">Rio Grande do Sul</option>
+                                    <option value="PR">Paraná</option>
+                                    <option value="PE">Pernambuco</option>
+                                    <option value="CE">Ceará</option>
+                                    <option value="PA">Pará</option>
+                                    <option value="SC">Santa Catarina</option>
+                                    <option value="GO">Goiás</option>
+                                    <option value="PB">Paraíba</option>
+                                    <option value="MA">Maranhão</option>
+                                    <option value="ES">Espírito Santo</option>
+                                    <option value="PI">Piauí</option>
+                                    <option value="RN">Rio Grande do Norte</option>
+                                    <option value="AL">Alagoas</option>
+                                    <option value="MT">Mato Grosso</option>
+                                    <option value="MS">Mato Grosso do Sul</option>
+                                    <option value="DF">Distrito Federal</option>
+                                    <option value="AC">Acre</option>
+                                    <option value="AM">Amazonas</option>
+                                    <option value="AP">Amapá</option>
+                                    <option value="RO">Rondônia</option>
+                                    <option value="RR">Roraima</option>
+                                    <option value="TO">Tocantins</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- CEP -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-300 mb-2">
+                                <i class="fa-solid fa-mailbox mr-2 text-teal-400"></i>CEP
+                            </label>
+                            <input 
+                                type="text" 
+                                id="cep" 
+                                placeholder="01310-100"
+                                class="input-focus w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-gray-500 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                                maxlength="9"
+                            >
+                            <p class="text-xs text-gray-400 mt-1">Formato: XXXXX-XXX</p>
+                        </div>
+
+                        <!-- Observações -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-300 mb-2">
+                                <i class="fa-solid fa-note-sticky mr-2 text-teal-400"></i>Observações
+                            </label>
+                            <textarea 
+                                id="obs" 
+                                placeholder="Informações adicionais do paciente..."
+                                rows="3"
+                                class="input-focus w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-gray-500 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 resize-none"
+                            ></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button 
+                        type="submit"
+                        id="btnSubmit"
+                        class="w-full bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white font-bold py-4 px-6 rounded-xl transition shadow-lg hover:shadow-xl flex items-center justify-center space-x-3 group"
+                    >
+                        <i class="fa-solid fa-check text-lg group-hover:scale-110 transition"></i>
+                        <span id="btnText">Cadastrar Paciente</span>
+                    </button>
+                </form>
+
+                <!-- Info Box -->
+                <div class="bg-teal-500/10 border border-teal-500/30 rounded-xl p-4 flex items-start space-x-3">
+                    <i class="fa-solid fa-circle-info text-teal-400 text-lg mt-0.5 flex-shrink-0"></i>
+                    <div class="text-sm text-gray-300">
+                        <p class="font-semibold text-teal-300">Campos obrigatórios marcados com *</p>
+                        <p class="text-xs mt-1">Seus dados serão salvos automaticamente no Google Sheets e processados de forma segura.</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Success Message -->
+            <div id="successMessage" class="hidden mt-6 bg-emerald-500/20 border border-emerald-500/50 rounded-2xl p-6 flex items-start space-x-4">
+                <div class="flex-shrink-0">
+                    <i class="fa-solid fa-circle-check text-emerald-400 text-2xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-emerald-300">Paciente Cadastrado com Sucesso!</h3>
+                    <p class="text-sm text-emerald-200 mt-1" id="successText"></p>
+                    <div class="flex space-x-3 mt-4">
+                        <button onclick="voltarForm()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition">
+                            <i class="fa-solid fa-plus mr-2"></i>Cadastrar Outro
+                        </button>
+                        <a href="index.html" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition">
+                            <i class="fa-solid fa-arrow-left mr-2"></i>Voltar ao Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- OdontoSys API Client -->
+    <script src="odontosys-api-client.js"></script>
+
+    <script>
+        // ==================== CONFIGURAÇÃO DA API ====================
+        const DEPLOYMENT_URL = "https://script.google.com/macros/s/AKfycbzH4yMpqMwSSD-85k1LOD8OsCQz5xZ2Ao92G_PcF4ewvfFQwUcdjufFWxaICGhZudwn/exec";
+        let api = null;
+
+        // ==================== INICIALIZAÇÃO ====================
+        window.addEventListener('load', async () => {
+            console.log('🚀 Página de Cadastro OdontoSys iniciando...');
+            console.log('🔌 API URL:', DEPLOYMENT_URL);
+            
+            // Inicializar o cliente da API
+            const deploymentId = DEPLOYMENT_URL.split('/').filter(p => p.length > 10)[0];
+            api = new OdontoSysAPI(deploymentId);
+            console.log('✅ Cliente OdontoSysAPI inicializado');
+            
+            // Testar conexão
+            const conectado = await api.testarConexao();
+            console.log(conectado ? '✅ Conexão API: OK' : '⚠️ Conexão API: FALHOU');
+            
+            // Atualizar status
+            atualizarStatusAPI(conectado);
+            
+            // Adicionar listeners de máscaras
+            setupMascaras();
+        });
+
+        // ==================== MÁSCARAS DE ENTRADA ====================
+        function setupMascaras() {
+            // Máscara de CPF
+            document.getElementById('cpf').addEventListener('input', (e) => {
+                let valor = e.target.value.replace(/\D/g, '');
+                valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+                valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+                valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+                e.target.value = valor;
+            });
+
+            // Máscara de Telefone
+            document.getElementById('telefone').addEventListener('input', (e) => {
+                let valor = e.target.value.replace(/\D/g, '');
+                if (valor.length > 0) {
+                    valor = '(' + valor.substring(0, 2) + ') ' + valor.substring(2, 7) + '-' + valor.substring(7, 11);
+                }
+                e.target.value = valor;
+            });
+
+            // Máscara de CEP
+            document.getElementById('cep').addEventListener('input', (e) => {
+                let valor = e.target.value.replace(/\D/g, '');
+                valor = valor.replace(/(\d{5})(\d)/, '$1-$2');
+                e.target.value = valor;
+            });
+        }
+
+        // ==================== VALIDAÇÕES ====================
+        function validarFormulario() {
+            const nome = document.getElementById('nome').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const telefone = document.getElementById('telefone').value.replace(/\D/g, '');
+            const cpf = document.getElementById('cpf').value.replace(/\D/g, '');
+
+            // Validar Nome
+            if (nome.length < 3) {
+                mostraErro('Nome deve ter no mínimo 3 caracteres');
+                return false;
+            }
+
+            // Validar Email
+            if (!OdontoSysAPI.validarEmail(email)) {
+                mostraErro('Email inválido. Verifique o formato.');
+                return false;
+            }
+
+            // Validar Telefone
+            if (telefone.length < 10) {
+                mostraErro('Telefone inválido. Use formato (XX) XXXXX-XXXX');
+                return false;
+            }
+
+            // Validar CPF (se preenchido)
+            if (cpf.length > 0 && cpf.length !== 11) {
+                mostraErro('CPF deve ter 11 dígitos');
+                return false;
+            }
+
+            if (cpf.length === 11 && !OdontoSysAPI.validarCPF(cpf)) {
+                mostraErro('CPF inválido. Verifique os dígitos.');
+                return false;
+            }
+
+            return true;
+        }
+
+        // ==================== ENVIO DO FORMULÁRIO ====================
+        document.getElementById('formCadastroPaciente').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!validarFormulario()) return;
+
+            // Mostrar carregamento
+            const btnSubmit = document.getElementById('btnSubmit');
+            const btnText = document.getElementById('btnText');
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<div class="spinner w-5 h-5 mr-2"></div> Processando...';
+
+            try {
+                // Coletar dados
+                const dados = {
+                    nome: document.getElementById('nome').value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    telefone: document.getElementById('telefone').value,
+                    cpf: document.getElementById('cpf').value,
+                    dataNascimento: document.getElementById('dataNascimento').value,
+                    endereco: document.getElementById('endereco').value.trim(),
+                    cidade: document.getElementById('cidade').value.trim(),
+                    estado: document.getElementById('estado').value,
+                    cep: document.getElementById('cep').value,
+                    obs: document.getElementById('obs').value.trim()
+                };
+
+                console.log('📤 Enviando dados:', dados);
+
+                // Enviar para API
+                const resultado = await api.adicionarPaciente(dados);
+
+                if (resultado.success) {
+                    console.log('✅ Paciente cadastrado com sucesso!');
+                    mostraroSucesso(dados.nome);
+                    document.getElementById('formCadastroPaciente').style.display = 'none';
+                } else {
+                    throw new Error(resultado.error || 'Erro desconhecido');
+                }
+
+            } catch (erro) {
+                console.error('❌ Erro ao cadastrar:', erro);
+                mostraErro('Erro ao cadastrar paciente: ' + erro.message);
+                
+            } finally {
+                // Restaurar botão
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = '<i class="fa-solid fa-check text-lg group-hover:scale-110 transition"></i><span>Cadastrar Paciente</span>';
+            }
+        });
+
+        // ==================== FUNÇÕES AUXILIARES ====================
+        function mostraErro(mensagem) {
+            alert('⚠️ ' + mensagem);
+        }
+
+        function mostraroSucesso(nome) {
+            document.getElementById('successMessage').classList.remove('hidden');
+            document.getElementById('successText').innerText = 
+                'O paciente ' + nome + ' foi cadastrado com sucesso! Seus dados foram salvos no banco de dados.';
+            
+            // Scroll para mensagem de sucesso
+            document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function voltarForm() {
+            // Resetar formulário
+            document.getElementById('formCadastroPaciente').reset();
+            document.getElementById('formCadastroPaciente').style.display = 'block';
+            document.getElementById('successMessage').classList.add('hidden');
+            
+            // Scroll para o topo
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function atualizarStatusAPI(conectado) {
+            const statusDot = document.getElementById('status-dot');
+            const statusText = document.getElementById('status-text');
+
+            if (conectado) {
+                statusDot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500';
+                statusText.innerText = '✅ API Conectada';
+                console.log('✅ Status: Conectado');
+            } else {
+                statusDot.className = 'w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse';
+                statusText.innerText = '❌ Erro de Conexão';
+                console.error('❌ Status: Desconectado');
+                alert('⚠️ Aviso: Não foi possível conectar à API. Verifique se o backend está ativo.');
+            }
+        }
+    </script>
+
+</body>
+</html>

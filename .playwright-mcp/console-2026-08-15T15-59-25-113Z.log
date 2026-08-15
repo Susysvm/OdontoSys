@@ -1,8 +1,0 @@
-[      43ms] [WARNING] cdn.tailwindcss.com should not be used in production. To use Tailwind CSS in production, install it as a PostCSS plugin or use the Tailwind CLI: https://tailwindcss.com/docs/installation @ https://cdn.tailwindcss.com/:63
-[     159ms] [LOG] 🚀 Página de Cadastro OdontoSys iniciando... @ http://localhost:8765/cadastro-usuario.html:301
-[     160ms] [LOG] 🔌 API URL: https://script.google.com/macros/s/AKfycbzH4yMpqMwSSD-85k1LOD8OsCQz5xZ2Ao92G_PcF4ewvfFQwUcdjufFWxaICGhZudwn/exec @ http://localhost:8765/cadastro-usuario.html:302
-[     160ms] [LOG] ✅ Cliente OdontoSysAPI inicializado @ http://localhost:8765/cadastro-usuario.html:306
-[    4421ms] [LOG] ✅ Conexão API: OK @ http://localhost:8765/cadastro-usuario.html:310
-[    4422ms] [LOG] ✅ Status: Conectado @ http://localhost:8765/cadastro-usuario.html:468
-[   18661ms] [LOG] 📤 Enviando dados: {nome: Paciente Teste Depuracao, email: teste.depuracao@exemplo.com, telefone: (92) 99999-8888, cpf: , dataNascimento: } @ http://localhost:8765/cadastro-usuario.html:413
-[   20585ms] [LOG] ✅ Paciente cadastrado com sucesso! @ http://localhost:8765/cadastro-usuario.html:419

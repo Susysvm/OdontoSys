@@ -295,16 +295,15 @@
     <script>
         // ==================== CONFIGURAÇÃO DA API ====================
         const DEPLOYMENT_URL = "https://script.google.com/macros/s/AKfycbzH4yMpqMwSSD-85k1LOD8OsCQz5xZ2Ao92G_PcF4ewvfFQwUcdjufFWxaICGhZudwn/exec";
-        let api = null;
+        // "api" já é declarada em odontosys-api-client.js — não redeclarar aqui
 
         // ==================== INICIALIZAÇÃO ====================
         window.addEventListener('load', async () => {
             console.log('🚀 Página de Cadastro OdontoSys iniciando...');
             console.log('🔌 API URL:', DEPLOYMENT_URL);
             
-            // Inicializar o cliente da API
-            const deploymentId = DEPLOYMENT_URL.split('/').filter(p => p.length > 10)[0];
-            api = new OdontoSysAPI(deploymentId);
+            // Inicializar o cliente da API com a URL completa do deployment
+            api = new OdontoSysAPI(DEPLOYMENT_URL);
             console.log('✅ Cliente OdontoSysAPI inicializado');
             
             // Testar conexão

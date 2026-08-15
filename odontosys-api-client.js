@@ -4,8 +4,13 @@
  */
 
 class OdontoSysAPI {
-  constructor(deploymentId) {
-    this.apiUrl = `https://script.google.com/macros/d/${deploymentId}/usercript`;
+  constructor(deploymentIdOrUrl) {
+    // Aceita a URL completa do deployment ou apenas o ID
+    if (String(deploymentIdOrUrl).startsWith('http')) {
+      this.apiUrl = deploymentIdOrUrl;
+    } else {
+      this.apiUrl = `https://script.google.com/macros/s/${deploymentIdOrUrl}/exec`;
+    }
     this.timeout = 10000; // 10 segundos
   }
 
@@ -18,8 +23,7 @@ class OdontoSysAPI {
       const url = `${this.apiUrl}?${queryString}`;
       
       const response = await fetch(url, {
-        method: 'GET',
-        timeout: this.timeout
+        method: 'GET'
       });
       
       if (!response.ok) {
@@ -40,11 +44,11 @@ class OdontoSysAPI {
     try {
       const payload = JSON.stringify({ action, ...data });
       
+      // Sem header Content-Type: o Apps Script não aceita "preflight" CORS,
+      // então o corpo vai como text/plain e o backend faz o JSON.parse
       const response = await fetch(this.apiUrl, {
         method: 'POST',
-        contentType: 'application/json',
-        payload: payload,
-        timeout: this.timeout
+        body: payload
       });
       
       if (!response.ok) {

@@ -313,7 +313,7 @@
         // Configuração de abas e estado
         let currentActiveTab = 'dashboard';
         let apiEndpoint = DEPLOYMENT_URL;
-        let api = null;
+        // "api" já é declarada em odontosys-api-client.js — não redeclarar aqui
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
@@ -345,7 +345,6 @@
         function salvarConfigAPI() {
             const val = document.getElementById('api-url-input').value.trim();
             apiEndpoint = val;
-            DEPLOYMENT_URL = val;
             localStorage.setItem('odontosys_api_url', val);
             closeConfigModal();
             mostrarMensagemModal('Configuração Salva', 'URL da API atualizada com sucesso. Recarregando...');
@@ -490,11 +489,8 @@
             console.log('🚀 OdontoSys iniciando...');
             console.log('🔌 API URL:', DEPLOYMENT_URL);
             
-            // Extrair o ID do deployment
-            const deploymentId = DEPLOYMENT_URL.split('/').filter(p => p.length > 10)[0];
-            
-            // Inicializar o cliente da API
-            api = new OdontoSysAPI(deploymentId);
+            // Inicializar o cliente da API com a URL completa do deployment
+            api = new OdontoSysAPI(DEPLOYMENT_URL);
             console.log('✅ Cliente OdontoSysAPI inicializado');
             
             // Testar conexão

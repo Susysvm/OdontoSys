@@ -1,0 +1,119 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]: 
+        - generic [ref=e7]:
+          - text: OdontoSys
+          - generic [ref=e8]: Cadastro de Pacientes
+      - generic [ref=e9]:
+        - generic [ref=e10]: Conectando...
+        - link " Voltar" [ref=e13] [cursor=pointer]:
+          - /url: index.html
+          - generic [ref=e14]: 
+          - generic [ref=e15]: Voltar
+  - main [ref=e16]:
+    - generic [ref=e17]:
+      - generic [ref=e18]:
+        - generic [ref=e19]:
+          - heading " Novo Paciente" [level=1] [ref=e20]:
+            - generic [ref=e21]: 
+            - generic [ref=e22]: Novo Paciente
+          - paragraph [ref=e23]: Preencha os dados abaixo para cadastrar um novo paciente no sistema
+        - generic [ref=e24]:
+          - generic [ref=e25]:
+            - heading " Dados Pessoais" [level=2] [ref=e26]:
+              - generic [ref=e27]: 
+              - generic [ref=e28]: Dados Pessoais
+            - generic [ref=e29]:
+              - generic [ref=e30]: Nome Completo *
+              - 'textbox "Ex: Maria Silva dos Santos" [ref=e31]'
+              - paragraph [ref=e32]: Mínimo 3 caracteres
+            - generic [ref=e33]:
+              - generic [ref=e34]:
+                - generic [ref=e35]: 
+                - text: Email *
+              - textbox "exemplo@email.com" [ref=e36]
+              - paragraph [ref=e37]: Email válido para contato
+            - generic [ref=e38]:
+              - generic [ref=e39]:
+                - generic [ref=e40]: 
+                - text: CPF
+              - textbox "000.000.000-00" [ref=e41]
+              - paragraph [ref=e42]: "Formato: XXX.XXX.XXX-XX"
+            - generic [ref=e43]:
+              - generic [ref=e44]:
+                - generic [ref=e45]: 
+                - text: Telefone *
+              - textbox "(11) 99999-9999" [ref=e46]
+              - paragraph [ref=e47]: Celular ou fixo com DDD
+            - generic [ref=e48]:
+              - generic [ref=e49]:
+                - generic [ref=e50]: 
+                - text: Data de Nascimento
+              - textbox [ref=e51]
+          - generic [ref=e52]:
+            - heading " Endereço" [level=2] [ref=e53]:
+              - generic [ref=e54]: 
+              - generic [ref=e55]: Endereço
+            - generic [ref=e56]:
+              - generic [ref=e57]:
+                - generic [ref=e58]: 
+                - text: Rua/Avenida
+              - 'textbox "Ex: Rua das Flores" [ref=e59]'
+            - generic [ref=e60]:
+              - generic [ref=e61]:
+                - generic [ref=e62]:
+                  - generic [ref=e63]: 
+                  - text: Cidade
+                - textbox "São Paulo" [ref=e64]
+              - generic [ref=e65]:
+                - generic [ref=e66]:
+                  - generic [ref=e67]: 
+                  - text: Estado
+                - combobox [ref=e68]:
+                  - option "Selecione..." [selected]
+                  - option "São Paulo"
+                  - option "Rio de Janeiro"
+                  - option "Minas Gerais"
+                  - option "Bahia"
+                  - option "Rio Grande do Sul"
+                  - option "Paraná"
+                  - option "Pernambuco"
+                  - option "Ceará"
+                  - option "Pará"
+                  - option "Santa Catarina"
+                  - option "Goiás"
+                  - option "Paraíba"
+                  - option "Maranhão"
+                  - option "Espírito Santo"
+                  - option "Piauí"
+                  - option "Rio Grande do Norte"
+                  - option "Alagoas"
+                  - option "Mato Grosso"
+                  - option "Mato Grosso do Sul"
+                  - option "Distrito Federal"
+                  - option "Acre"
+                  - option "Amazonas"
+                  - option "Amapá"
+                  - option "Rondônia"
+                  - option "Roraima"
+                  - option "Tocantins"
+            - generic [ref=e69]:
+              - generic [ref=e70]: CEP
+              - textbox "01310-100" [ref=e71]
+              - paragraph [ref=e72]: "Formato: XXXXX-XXX"
+            - generic [ref=e73]:
+              - generic [ref=e74]:
+                - generic [ref=e75]: 
+                - text: Observações
+              - textbox "Informações adicionais do paciente..." [ref=e76]
+          - button " Cadastrar Paciente" [ref=e77] [cursor=pointer]:
+            - generic [ref=e78]: 
+            - generic [ref=e79]: Cadastrar Paciente
+        - generic [ref=e80]:
+          - generic [ref=e81]: 
+          - generic [ref=e82]:
+            - paragraph [ref=e83]: Campos obrigatórios marcados com *
+            - paragraph [ref=e84]: Seus dados serão salvos automaticamente no Google Sheets e processados de forma segura.
+      - text:  + 

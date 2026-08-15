@@ -37,26 +37,36 @@ function getSheet(sheetName) {
 }
 
 /**
+ * Linha "vazia de verdade": só células em branco ou checkbox desmarcado.
+ * (Colunas de checkbox preenchem a grade inteira com FALSE, então não
+ * dá para confiar só no getDataRange.)
+ */
+function isRowEmpty(row) {
+  return row.every(function (cell) { return cell === "" || cell === false; });
+}
+
+/**
  * Converter dados da planilha em JSON
  */
 function sheetToJson(sheetName) {
   const sheet = getSheet(sheetName);
   const range = sheet.getDataRange();
   const values = range.getValues();
-  
+
   if (values.length === 0) return [];
-  
+
   const headers = values[0];
   const data = [];
-  
+
   for (let i = 1; i < values.length; i++) {
+    if (isRowEmpty(values[i])) continue;
     const row = {};
     for (let j = 0; j < headers.length; j++) {
       row[headers[j]] = values[i][j];
     }
     data.push(row);
   }
-  
+
   return data;
 }
 
@@ -67,21 +77,28 @@ function addRow(sheetName, data) {
   const sheet = getSheet(sheetName);
   const range = sheet.getDataRange();
   const values = range.getValues();
-  
-  if (values.length === 0) {
-    // Se vazio, criar header
-    const headers = Object.keys(data);
-    sheet.appendRow(headers);
+  const keys = Object.keys(data);
+
+  if (values.length === 0 || isRowEmpty(values[0])) {
+    // Planilha vazia: criar header e gravar a primeira linha
+    sheet.getRange(1, 1, 1, keys.length).setValues([keys]);
+    sheet.getRange(2, 1, 1, keys.length).setValues([keys.map(function (k) { return data[k]; })]);
+    return { success: true, message: "Registro adicionado com sucesso" };
   }
-  
+
   const headers = values[0];
-  const row = [];
-  
-  for (let header of headers) {
-    row.push(data[header] || "");
+  const row = headers.map(function (h) {
+    return data[h] !== undefined ? data[h] : "";
+  });
+
+  // Achar a última linha com conteúdo de verdade (appendRow se perde
+  // quando uma coluna de checkbox preenche a grade toda com FALSE)
+  let lastRow = 1;
+  for (let i = 1; i < values.length; i++) {
+    if (!isRowEmpty(values[i])) lastRow = i + 1;
   }
-  
-  sheet.appendRow(row);
+
+  sheet.getRange(lastRow + 1, 1, 1, row.length).setValues([row]);
   return { success: true, message: "Registro adicionado com sucesso" };
 }
 
@@ -98,14 +115,15 @@ function updateRow(sheetName, id, data) {
   }
   
   const headers = values[0];
-  const idIndex = headers.indexOf("ID");
-  
+  let idIndex = headers.indexOf("ID");
+  if (idIndex === -1) idIndex = headers.indexOf("id");
+
   if (idIndex === -1) {
     return { success: false, error: "Coluna ID não encontrada" };
   }
-  
+
   for (let i = 1; i < values.length; i++) {
-    if (values[i][idIndex] === id) {
+    if (String(values[i][idIndex]) === String(id)) {
       for (let j = 0; j < headers.length; j++) {
         if (data[headers[j]] !== undefined) {
           sheet.getRange(i + 1, j + 1).setValue(data[headers[j]]);
@@ -131,14 +149,15 @@ function deleteRow(sheetName, id) {
   }
   
   const headers = values[0];
-  const idIndex = headers.indexOf("ID");
-  
+  let idIndex = headers.indexOf("ID");
+  if (idIndex === -1) idIndex = headers.indexOf("id");
+
   if (idIndex === -1) {
     return { success: false, error: "Coluna ID não encontrada" };
   }
-  
+
   for (let i = 1; i < values.length; i++) {
-    if (values[i][idIndex] === id) {
+    if (String(values[i][idIndex]) === String(id)) {
       sheet.deleteRow(i + 1);
       return { success: true, message: "Registro deletado com sucesso" };
     }
@@ -272,7 +291,7 @@ function handleGetPacientes() {
 
 function handleGetPaciente(id) {
   const pacientes = sheetToJson(SHEET_PACIENTES);
-  const paciente = pacientes.find(p => p.ID === id);
+  const paciente = pacientes.find(p => String(p.ID !== undefined ? p.ID : p.id) === String(id));
   
   if (!paciente) {
     return { success: false, error: "Paciente não encontrado" };
@@ -282,23 +301,43 @@ function handleGetPaciente(id) {
 }
 
 function handleAddPaciente(data) {
+  // Colunas reais da aba "Pacientes" na planilha:
+  // id | nome_completo | cpf | data_nascimento | celular | email |
+  // endereco_completo | foto_url | status_lgpd | ativo
+  const enderecoCompleto = [
+    data.endereco,
+    data.cidade,
+    data.estado,
+    data.cep ? "CEP " + data.cep : ""
+  ].filter(function (x) { return x; }).join(", ");
+
   const paciente = {
-    ID: generateId(),
-    Nome: data.nome || "",
-    CPF: data.cpf || "",
-    Email: data.email || "",
-    Telefone: data.telefone || "",
-    DataNascimento: data.dataNascimento || "",
-    Endereço: data.endereco || "",
-    Cidade: data.cidade || "",
-    Estado: data.estado || "",
-    CEP: data.cep || "",
-    DataCadastro: new Date().toLocaleDateString("pt-BR"),
-    Status: "Ativo",
-    Obs: data.obs || ""
+    id: proximoIdNumerico(SHEET_PACIENTES),
+    nome_completo: data.nome || "",
+    cpf: data.cpf || "",
+    data_nascimento: data.dataNascimento || "",
+    celular: data.telefone || "",
+    email: data.email || "",
+    endereco_completo: enderecoCompleto,
+    foto_url: "",
+    status_lgpd: "Pendente",
+    ativo: true
   };
-  
+
   return addRow(SHEET_PACIENTES, paciente);
+}
+
+/**
+ * Próximo id numérico sequencial (coluna "id") de uma aba
+ */
+function proximoIdNumerico(sheetName) {
+  const registros = sheetToJson(sheetName);
+  let maior = 0;
+  registros.forEach(function (r) {
+    const n = parseInt(r.id, 10);
+    if (!isNaN(n) && n > maior) maior = n;
+  });
+  return maior + 1;
 }
 
 function handleUpdatePaciente(data) {

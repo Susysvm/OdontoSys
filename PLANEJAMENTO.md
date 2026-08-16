@@ -88,6 +88,10 @@ O cadastro de paciente já foi alinhado (15/08/2026). Falta alinhar os demais m�
 
 ---
 
+## 🔐 Aviso importante de segurança (LGPD)
+
+A API do backend é **pública e sem login** (`access: ANYONE_ANONYMOUS`) — é o que permite o site no GitHub Pages funcionar sem conta Google, mas significa que **qualquer pessoa com o link consegue ler e gravar dados**. Enquanto a planilha tiver só dados fictícios de aula, tudo bem. **Antes de qualquer uso com pacientes reais**, é obrigatório implementar autenticação de verdade (Fase 7.2 — login) ou migrar para um backend com controle de acesso; dados de saúde reais neste modelo violariam a LGPD.
+
 ## ⚠️ Riscos e observações
 
 1. **Fase 0 é pré-requisito de tudo** — sem republicar o Apps Script, o site continua "fingindo" que salva.

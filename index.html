@@ -200,10 +200,37 @@
                         <span>Novo Paciente</span>
                     </a>
                 </div>
-                <div class="bg-white rounded-2xl border border-gray-200 p-8 text-center text-gray-500">
-                    <i class="fa-solid fa-users text-4xl text-gray-300 mb-3"></i>
-                    <p class="font-medium">Carregamento da aba "Pacientes" pronto.</p>
-                    <p class="text-xs text-gray-400 mt-1">Integração nativa com Google Sheets ativa.</p>
+                <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-gray-50/50">
+                        <div class="relative w-full sm:w-72">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                            <input type="text" id="pacientes-busca" oninput="filtrarPacientes()" placeholder="Buscar por nome..." class="w-full pl-9 pr-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        </div>
+                        <button onclick="carregarPacientes(true)" class="bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 font-semibold px-3.5 py-2 rounded-xl text-sm transition flex items-center space-x-2 shrink-0">
+                            <i class="fa-solid fa-rotate"></i>
+                            <span>Recarregar</span>
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-100 text-gray-600 text-xs font-bold uppercase tracking-wider">
+                                    <th class="p-3">Nome</th>
+                                    <th class="p-3">CPF</th>
+                                    <th class="p-3">Celular</th>
+                                    <th class="p-3">Email</th>
+                                    <th class="p-3">LGPD</th>
+                                    <th class="p-3">Situação</th>
+                                    <th class="p-3 text-right">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-pacientes-corpo" class="text-sm divide-y divide-gray-100">
+                                <tr>
+                                    <td colspan="7" class="p-6 text-center text-gray-400 italic">Abra esta aba para carregar os pacientes.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -302,6 +329,73 @@
         </div>
     </div>
 
+    <!-- Modal Editar Paciente -->
+    <div id="editar-paciente-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-gray-100 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-900 flex items-center space-x-2">
+                    <i class="fa-solid fa-user-pen text-teal-600"></i>
+                    <span>Editar Paciente</span>
+                </h3>
+                <button onclick="closeEditarPacienteModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <input type="hidden" id="edit-paciente-id">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Nome completo</label>
+                    <input type="text" id="edit-paciente-nome" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">CPF</label>
+                    <input type="text" id="edit-paciente-cpf" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Celular</label>
+                    <input type="text" id="edit-paciente-celular" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Email</label>
+                    <input type="email" id="edit-paciente-email" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Data de nascimento</label>
+                    <input type="text" id="edit-paciente-nascimento" placeholder="dd/mm/aaaa" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Status LGPD</label>
+                    <select id="edit-paciente-lgpd" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        <option value="Pendente">Pendente</option>
+                        <option value="Assinado">Assinado</option>
+                        <option value="Recusado">Recusado</option>
+                    </select>
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Endereço completo</label>
+                    <input type="text" id="edit-paciente-endereco" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                </div>
+            </div>
+            <div class="flex justify-end space-x-3 pt-2">
+                <button onclick="closeEditarPacienteModal()" class="px-4 py-2 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-100 transition">Cancelar</button>
+                <button id="btn-salvar-edicao-paciente" onclick="salvarEdicaoPaciente()" class="px-5 py-2 rounded-xl text-sm font-semibold bg-teal-600 hover:bg-teal-700 text-white transition shadow-sm">Salvar Alterações</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação de Ação (Sem usar confirm() nativo) -->
+    <div id="confirmar-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-gray-100 text-center space-y-4">
+            <div class="w-12 h-12 bg-amber-100 text-amber-700 rounded-2xl flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 id="confirmar-modal-title" class="text-lg font-bold text-gray-900">Confirmar ação</h3>
+            <p id="confirmar-modal-desc" class="text-sm text-gray-600">Tem certeza?</p>
+            <div class="flex justify-center space-x-3 pt-1">
+                <button onclick="closeConfirmarModal()" class="px-4 py-2 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-100 transition">Cancelar</button>
+                <button id="confirmar-modal-btn-ok" onclick="executarConfirmacao()" class="px-5 py-2 rounded-xl text-sm font-semibold bg-red-600 hover:bg-red-700 text-white transition shadow-sm">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- OdontoSys API Client -->
     <script src="odontosys-api-client.js"></script>
 
@@ -331,6 +425,36 @@
                 targetNav.classList.add('bg-teal-50', 'text-teal-700');
             }
             currentActiveTab = tabId;
+
+            if (tabId === 'pacientes') {
+                carregarPacientes(false);
+            }
+        }
+
+        // Escapa valores vindos da planilha antes de injetar no HTML
+        function esc(valor) {
+            if (valor === null || valor === undefined) return '';
+            return String(valor)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function pacienteAtivo(p) {
+            return p.ativo === true || p.ativo === 'true' || p.ativo === 'TRUE' || p.ativo === 1 || p.ativo === '1';
+        }
+
+        function classeStatusBadge(status) {
+            const s = (status || '').toString().trim().toLowerCase();
+            if (['ativo', 'confirmado', 'recebido', 'pago'].includes(s)) {
+                return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+            }
+            if (['pendente', 'agendado'].includes(s)) {
+                return 'bg-amber-50 text-amber-700 border-amber-200';
+            }
+            return 'bg-gray-100 text-gray-500 border-gray-200';
         }
 
         function openConfigModal() {
@@ -374,10 +498,222 @@
             }
         }
 
-        // Função para simular ou buscar dados reais do Google Sheets via API Web App
+        // ==================== MÓDULO PACIENTES ====================
+        let pacientesCache = [];
+        let pacientesCarregados = false;
+        let confirmarModalCallback = null;
+
+        async function carregarPacientes(forcar) {
+            const tbody = document.getElementById('tabela-pacientes-corpo');
+            if (pacientesCarregados && !forcar) {
+                renderizarPacientes(pacientesCache);
+                return;
+            }
+            tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Carregando pacientes...</td></tr>`;
+            try {
+                const resultado = await api.listarPacientes();
+                if (!resultado.success) {
+                    tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-red-500">Erro ao carregar pacientes: ${esc(resultado.error || 'desconhecido')}</td></tr>`;
+                    return;
+                }
+                pacientesCache = resultado.data || [];
+                pacientesCarregados = true;
+                document.getElementById('pacientes-busca').value = '';
+                renderizarPacientes(pacientesCache);
+            } catch (error) {
+                console.error('Erro ao carregar pacientes:', error);
+                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-red-500">Erro ao carregar pacientes. Verifique a conexão com a API.</td></tr>`;
+            }
+        }
+
+        function filtrarPacientes() {
+            const termo = document.getElementById('pacientes-busca').value.trim().toLowerCase();
+            if (!termo) {
+                renderizarPacientes(pacientesCache);
+                return;
+            }
+            const filtrados = pacientesCache.filter(p => (p.nome_completo || '').toLowerCase().includes(termo));
+            renderizarPacientes(filtrados);
+        }
+
+        function renderizarPacientes(lista) {
+            const tbody = document.getElementById('tabela-pacientes-corpo');
+            if (!lista || lista.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-400 italic">Nenhum paciente cadastrado.</td></tr>`;
+                return;
+            }
+            let html = '';
+            lista.forEach(p => {
+                const ativo = pacienteAtivo(p);
+                const lgpd = p.status_lgpd || 'Pendente';
+                const lgpdClasse = lgpd === 'Assinado'
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                    : lgpd === 'Recusado'
+                        ? 'bg-red-50 text-red-700 border-red-200'
+                        : 'bg-amber-50 text-amber-700 border-amber-200';
+                const situacaoClasse = ativo ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-gray-100 text-gray-500 border-gray-200';
+                const situacaoTexto = ativo ? 'Ativo' : 'Inativo';
+                const cpfMasc = p.cpf ? OdontoSysAPI.mascaraCPF(String(p.cpf)) : '-';
+                const celMasc = p.celular ? OdontoSysAPI.mascaraTelefone(String(p.celular)) : '-';
+                html += `
+                    <tr class="hover:bg-gray-50/80 transition">
+                        <td class="p-3 font-medium text-gray-800">${esc(p.nome_completo || '-')}</td>
+                        <td class="p-3 text-gray-600">${esc(cpfMasc)}</td>
+                        <td class="p-3 text-gray-600">${esc(celMasc)}</td>
+                        <td class="p-3 text-gray-600">${esc(p.email || '-')}</td>
+                        <td class="p-3"><span class="px-2.5 py-1 rounded-full text-xs font-semibold border ${lgpdClasse}">${esc(lgpd)}</span></td>
+                        <td class="p-3"><span class="px-2.5 py-1 rounded-full text-xs font-semibold border ${situacaoClasse}">${situacaoTexto}</span></td>
+                        <td class="p-3 text-right space-x-2 whitespace-nowrap">
+                            <button data-action="editar" data-id="${esc(p.id)}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition"><i class="fa-solid fa-pen"></i> Editar</button>
+                            ${ativo
+                                ? `<button data-action="desativar" data-id="${esc(p.id)}" class="bg-red-50 hover:bg-red-100 text-red-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition"><i class="fa-solid fa-ban"></i> Desativar</button>`
+                                : `<button data-action="reativar" data-id="${esc(p.id)}" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition"><i class="fa-solid fa-rotate-left"></i> Reativar</button>`
+                            }
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        // Delegação de evento: nunca interpolar dados da planilha em atributos onclick
+        // (entidades HTML em atributos são decodificadas pelo navegador antes de rodar o JS,
+        // então esc() sozinho não protege contra quebra de string dentro de onclick="...").
+        document.getElementById('tabela-pacientes-corpo').addEventListener('click', function (e) {
+            const btn = e.target.closest('button[data-action]');
+            if (!btn || !this.contains(btn)) return;
+            const id = btn.dataset.id;
+            const action = btn.dataset.action;
+            if (action === 'editar') abrirEditarPaciente(id);
+            else if (action === 'desativar') confirmarDesativarPaciente(id);
+            else if (action === 'reativar') confirmarReativarPaciente(id);
+        });
+
+        function abrirEditarPaciente(id) {
+            const p = pacientesCache.find(x => String(x.id) === String(id));
+            if (!p) {
+                mostrarMensagemModal('Erro', 'Paciente não encontrado na lista carregada. Recarregue a lista e tente novamente.');
+                return;
+            }
+            document.getElementById('edit-paciente-id').value = p.id;
+            document.getElementById('edit-paciente-nome').value = p.nome_completo || '';
+            document.getElementById('edit-paciente-cpf').value = p.cpf || '';
+            document.getElementById('edit-paciente-celular').value = p.celular || '';
+            document.getElementById('edit-paciente-email').value = p.email || '';
+            document.getElementById('edit-paciente-nascimento').value = p.data_nascimento || '';
+            document.getElementById('edit-paciente-endereco').value = p.endereco_completo || '';
+            document.getElementById('edit-paciente-lgpd').value = p.status_lgpd || 'Pendente';
+            document.getElementById('editar-paciente-modal').classList.remove('hidden');
+        }
+
+        function closeEditarPacienteModal() {
+            document.getElementById('editar-paciente-modal').classList.add('hidden');
+        }
+
+        async function salvarEdicaoPaciente() {
+            const id = document.getElementById('edit-paciente-id').value;
+            const btn = document.getElementById('btn-salvar-edicao-paciente');
+            const campos = {
+                nome: document.getElementById('edit-paciente-nome').value.trim(),
+                cpf: document.getElementById('edit-paciente-cpf').value.trim(),
+                telefone: document.getElementById('edit-paciente-celular').value.trim(),
+                email: document.getElementById('edit-paciente-email').value.trim(),
+                dataNascimento: document.getElementById('edit-paciente-nascimento').value.trim(),
+                endereco: document.getElementById('edit-paciente-endereco').value.trim(),
+                statusLgpd: document.getElementById('edit-paciente-lgpd').value
+            };
+            if (!campos.nome) {
+                mostrarMensagemModal('Campo obrigatório', 'Informe o nome completo do paciente.');
+                return;
+            }
+            btn.disabled = true;
+            const textoOriginal = btn.innerText;
+            btn.innerText = 'Salvando...';
+            try {
+                const resultado = await api.atualizarPaciente(id, campos);
+                if (resultado.success) {
+                    closeEditarPacienteModal();
+                    mostrarMensagemModal('Sucesso', 'Paciente atualizado com sucesso.');
+                    await carregarPacientes(true);
+                } else {
+                    mostrarMensagemModal('Erro ao salvar', 'Não foi possível salvar as alterações: ' + (resultado.error || 'erro desconhecido.'));
+                }
+            } catch (error) {
+                console.error('Erro ao salvar paciente:', error);
+                mostrarMensagemModal('Erro ao salvar', 'Falha de comunicação com a API ao salvar o paciente.');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = textoOriginal;
+            }
+        }
+
+        function confirmarDesativarPaciente(id) {
+            const p = pacientesCache.find(x => String(x.id) === String(id));
+            const nome = p ? p.nome_completo : 'este paciente';
+            abrirConfirmarModal(
+                'Desativar paciente',
+                `Tem certeza que deseja desativar "${nome}"? Ele deixará de aparecer como ativo no sistema.`,
+                () => executarAtualizacaoStatusPaciente(id, false)
+            );
+        }
+
+        function confirmarReativarPaciente(id) {
+            const p = pacientesCache.find(x => String(x.id) === String(id));
+            const nome = p ? p.nome_completo : 'este paciente';
+            abrirConfirmarModal(
+                'Reativar paciente',
+                `Deseja reativar "${nome}"?`,
+                () => executarAtualizacaoStatusPaciente(id, true)
+            );
+        }
+
+        async function executarAtualizacaoStatusPaciente(id, ativo) {
+            try {
+                const resultado = await api.post('updatePaciente', { id, ativo });
+                if (resultado.success) {
+                    mostrarMensagemModal('Sucesso', ativo ? 'Paciente reativado com sucesso.' : 'Paciente desativado com sucesso.');
+                    await carregarPacientes(true);
+                } else {
+                    mostrarMensagemModal('Erro', 'Não foi possível atualizar o paciente: ' + (resultado.error || 'erro desconhecido.'));
+                }
+            } catch (error) {
+                console.error('Erro ao atualizar status do paciente:', error);
+                mostrarMensagemModal('Erro', 'Falha de comunicação com a API ao atualizar o paciente.');
+            }
+        }
+
+        function abrirConfirmarModal(titulo, descricao, onConfirm) {
+            document.getElementById('confirmar-modal-title').innerText = titulo;
+            document.getElementById('confirmar-modal-desc').innerText = descricao;
+            confirmarModalCallback = onConfirm;
+            document.getElementById('confirmar-modal').classList.remove('hidden');
+        }
+
+        function closeConfirmarModal() {
+            document.getElementById('confirmar-modal').classList.add('hidden');
+            confirmarModalCallback = null;
+        }
+
+        function executarConfirmacao() {
+            document.getElementById('confirmar-modal').classList.add('hidden');
+            if (confirmarModalCallback) {
+                const cb = confirmarModalCallback;
+                confirmarModalCallback = null;
+                cb();
+            }
+        }
+
+        // Delegação de evento (mesmo motivo do tbody de pacientes: nunca onclick com dado interpolado)
+        document.getElementById('tabela-preview-corpo').addEventListener('click', function (e) {
+            const btn = e.target.closest('button[data-action="detalhe"]');
+            if (!btn || !this.contains(btn)) return;
+            mostrarMensagemModal('Detalhe do Registro', `${btn.dataset.tipo} - ${btn.dataset.detalhe}`);
+        });
+
+        // Função para buscar dados reais do Google Sheets via API Web App
         async function carregarDadosPlanilha() {
             if (!api) return;
-            
+
             // Mostrar carregamento
             const tbody = document.getElementById('tabela-preview-corpo');
             tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Sincronizando com o Google Sheets...</td></tr>`;
@@ -385,90 +721,88 @@
             try {
                 // Obter dados do dashboard
                 const dashboardResult = await api.obterDashboard();
-                
+
                 if (dashboardResult.success && dashboardResult.resumo) {
                     const resumo = dashboardResult.resumo;
-                    
+
                     // Atualizar métricas do dashboard
                     document.getElementById('metric-pacientes').innerText = resumo.totalPacientes || '0';
                     document.getElementById('metric-agendamentos').innerText = resumo.agendamentosHoje || '0';
                     document.getElementById('metric-receita').innerText = OdontoSysAPI.formatarMoeda(resumo.totalRecebido || 0);
                     document.getElementById('metric-estoque').innerText = resumo.itensBaixoEstoque || '0';
-                    
+
                     atualizarStatusConexao(true);
                 }
-                
-                // Carregar pacientes
+
+                // Carregar dados reais das abas
                 const pacientesResult = await api.listarPacientes();
                 const agendamentosResult = await api.listarAgendamentos();
                 const financeirosResult = await api.obterFinanceiro();
-                
+
                 let dados = [];
-                
-                // Processar dados de pacientes
+
+                // Processar dados de pacientes (campos reais: id, nome_completo, email, ativo)
                 if (pacientesResult.success && pacientesResult.data) {
                     pacientesResult.data.slice(0, 2).forEach(p => {
                         dados.push({
-                            id: p.ID,
-                            nome: p.Nome,
-                            detalhe: `Paciente - ${p.Email || 'sem email'}`,
-                            status: p.Status || 'Ativo',
+                            id: p.id,
+                            nome: p.nome_completo || 'Sem nome',
+                            detalhe: `Paciente - ${p.email || 'sem email'}`,
+                            status: pacienteAtivo(p) ? 'Ativo' : 'Inativo',
                             tipo: 'Paciente'
                         });
                     });
                 }
-                
-                // Processar dados de agendamentos
+
+                // Processar dados de agendamentos (campos reais: id, procedimento, data_consulta, horario_consulta, status)
                 if (agendamentosResult.success && agendamentosResult.data) {
                     agendamentosResult.data.slice(0, 1).forEach(a => {
                         dados.push({
-                            id: a.ID,
-                            nome: a.Procedimento || 'Sem procedimento',
-                            detalhe: `Agendamento - ${a.Data} ${a.Hora}`,
-                            status: a.Status || 'Agendado',
+                            id: a.id,
+                            nome: a.procedimento || 'Sem procedimento',
+                            detalhe: `Agendamento - ${a.data_consulta || ''} ${a.horario_consulta || ''}`.trim(),
+                            status: a.status || 'Agendado',
                             tipo: 'Agendamento'
                         });
                     });
                 }
-                
-                // Processar dados financeiros
+
+                // Processar dados financeiros (campos reais: id, descricao, valor_total, status_pagamento)
+                // valor_total já vem como texto "R$ X,XX" — exibir como está
                 if (financeirosResult.success && financeirosResult.data) {
                     financeirosResult.data.slice(0, 1).forEach(f => {
                         dados.push({
-                            id: f.ID,
-                            nome: f.Descricao || 'Sem descrição',
-                            detalhe: `Financeiro - ${OdontoSysAPI.formatarMoeda(f.Valor)}`,
-                            status: f.Status || 'Pendente',
+                            id: f.id,
+                            nome: f.descricao || 'Sem descrição',
+                            detalhe: `Financeiro - ${f.valor_total || '-'}`,
+                            status: f.status_pagamento || 'Pendente',
                             tipo: 'Financeiro'
                         });
                     });
                 }
-                
-                // Se não houver dados, mostrar dados de demonstração
+
+                // Sem dados de demonstração falsos: se vazio, avisar honestamente
                 if (dados.length === 0) {
-                    dados = [
-                        { id: 1, nome: "Maria Silva", detalhe: "Tratamento - Clareamento Dental", status: "Confirmado", tipo: "Paciente" },
-                        { id: 2, nome: "Carlos Eduardo", detalhe: "Avaliação - Avaliação Geral", status: "Pendente", tipo: "Agendamento" },
-                        { id: 3, nome: "Resina Composta A2", detalhe: "Estoque - 15 unidades", status: "Ativo", tipo: "Estoque" },
-                        { id: 4, nome: "Pagamento Restauração", detalhe: "Receita - R$ 250,00 (PIX)", status: "Recebido", tipo: "Financeiro" }
-                    ];
+                    tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-400 italic">Nenhum dado na planilha ainda.</td></tr>`;
+                    return;
                 }
-                
+
                 // Renderizar tabela
                 let html = '';
                 dados.forEach(item => {
+                    const badgeClasse = classeStatusBadge(item.status);
                     html += `
                         <tr class="hover:bg-gray-50/80 transition">
-                            <td class="p-3 font-semibold text-gray-900">#${item.id.toString().substring(0, 10)}</td>
-                            <td class="p-3 font-medium text-gray-800">${item.nome}</td>
-                            <td class="p-3 text-gray-600 text-xs">${item.detalhe}</td>
+                            <td class="p-3 font-semibold text-gray-900">#${esc(String(item.id).substring(0, 10))}</td>
+                            <td class="p-3 font-medium text-gray-800">${esc(item.nome)}</td>
+                            <td class="p-3 text-gray-600 text-xs">${esc(item.detalhe)}</td>
                             <td class="p-3">
-                                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                    ${item.status}
+                                <span class="px-2.5 py-1 rounded-full text-xs font-semibold border ${badgeClasse}">
+                                    ${esc(item.status)}
                                 </span>
                             </td>
                             <td class="p-3 text-right">
-                                <button onclick="mostrarMensagemModal('Detalhe do Registro', 'Registro - ${item.detalhe}')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition">
+                                <button data-action="detalhe" data-tipo="${esc(item.tipo)}" data-detalhe="${esc(item.detalhe)}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition">
                                     Ver Detalhes
                                 </button>
                             </td>
@@ -476,7 +810,7 @@
                     `;
                 });
                 tbody.innerHTML = html;
-                
+
             } catch (error) {
                 console.error('Erro ao carregar dados:', error);
                 mostrarMensagemModal('Erro de Sincronização', 'Não foi possível conectar à API. Verifique a URL do deployment.');
@@ -487,22 +821,27 @@
         // ==================== INICIALIZAÇÃO ====================
         window.addEventListener('load', async () => {
             console.log('🚀 OdontoSys iniciando...');
-            console.log('🔌 API URL:', DEPLOYMENT_URL);
-            
-            // Inicializar o cliente da API com a URL completa do deployment
-            api = new OdontoSysAPI(DEPLOYMENT_URL);
+
+            // Se houver URL salva pelo usuário na config, usar em vez da constante
+            const urlSalva = localStorage.getItem('odontosys_api_url');
+            const urlFinal = (urlSalva && urlSalva.startsWith('https')) ? urlSalva : DEPLOYMENT_URL;
+            apiEndpoint = urlFinal;
+            console.log('🔌 API URL:', urlFinal);
+
+            // Inicializar o cliente da API com a URL final (salva ou deployment padrão)
+            api = new OdontoSysAPI(urlFinal);
             console.log('✅ Cliente OdontoSysAPI inicializado');
-            
+
             // Testar conexão
             const conectado = await api.testarConexao();
             console.log(conectado ? '✅ Conexão API: OK' : '⚠️ Conexão API: FALHOU');
-            
+
             // Atualizar status de conexão
             atualizarStatusConexao(conectado);
-            
+
             // Carregar dados
             carregarDadosPlanilha();
-            
+
             // Atualizar a cada 5 minutos
             setInterval(carregarDadosPlanilha, 5 * 60 * 1000);
         });

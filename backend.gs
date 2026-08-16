@@ -62,16 +62,29 @@ function sheetToJson(sheetName) {
     if (isRowEmpty(values[i])) continue;
     const row = {};
     for (let j = 0; j < headers.length; j++) {
-      const celula = values[i][j];
-      // Célula de data pode vir como objeto Date do Sheets (o JSON a
-      // serializaria em ISO); normaliza para "dd/mm/aaaa" antes de sair.
-      // Demais tipos de valor seguem inalterados.
-      row[headers[j]] = celula instanceof Date ? formatDataBR(celula) : celula;
+      row[headers[j]] = normalizarCelulaData(values[i][j]);
     }
     data.push(row);
   }
 
   return data;
+}
+
+/**
+ * Normaliza uma célula vinda do Sheets: se for objeto Date, converte para
+ * texto (o JSON a serializaria em ISO, e o frontend perderia o formato
+ * pt-BR); demais tipos de valor seguem inalterados.
+ *
+ * O Sheets grava célula de "só hora" (ex.: horario_consulta "10:00") como
+ * Date ancorado no epoch dele (30/12/1899) — nesse caso o texto certo é a
+ * hora ("HH:mm"), não a data. Ano <= 1900 é o sinal desse caso.
+ */
+function normalizarCelulaData(v) {
+  if (!(v instanceof Date)) return v;
+  if (v.getFullYear() <= 1900) {
+    return Utilities.formatDate(v, "America/Manaus", "HH:mm");
+  }
+  return formatDataBR(v);
 }
 
 /**

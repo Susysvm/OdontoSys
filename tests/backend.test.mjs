@@ -181,15 +181,26 @@ function criarAmbiente() {
   };
 
   const Utilities = {
-    // Formata de verdade a Date recebida (não um valor fixo), para que a
-    // normalização de células Date em sheetToJson seja testável com
-    // qualquer data de fixture. hojeBR() chama isso com `new Date()`
-    // (o "agora" real da máquina de teste); no ambiente desta suíte
-    // "agora" cai em 15/08/2026, que é a data usada nas fixtures de
-    // agendamento "de hoje".
-    formatDate(date, timeZone, _pattern) {
+    // Formata de verdade a Date recebida (não um valor fixo), respeitando o
+    // pattern pedido, para que a normalização de células Date em
+    // sheetToJson seja testável com qualquer data/hora de fixture.
+    // hojeBR() chama isso com `new Date()` (o "agora" real da máquina de
+    // teste) e pattern "dd/MM/yyyy"; no ambiente desta suíte "agora" cai em
+    // 15/08/2026, que é a data usada nas fixtures de agendamento "de hoje".
+    formatDate(date, timeZone, pattern) {
+      const tz = timeZone || "America/Manaus";
+      if (pattern === "HH:mm") {
+        const formatter = new Intl.DateTimeFormat("pt-BR", {
+          timeZone: tz,
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false
+        });
+        return formatter.format(date);
+      }
+      // Padrão usado no resto do backend: "dd/MM/yyyy"
       const formatter = new Intl.DateTimeFormat("pt-BR", {
-        timeZone: timeZone || "America/Manaus",
+        timeZone: tz,
         day: "2-digit",
         month: "2-digit",
         year: "numeric"
@@ -621,4 +632,23 @@ test("sheetToJson normaliza célula Date para dd/mm/aaaa (demais tipos inalterad
   assert.equal(paciente1.nome_completo, "Maria Silva");
   assert.equal(paciente1.ativo, true);
   assert.equal(typeof paciente1.id, "number");
+});
+
+test("sheetToJson normaliza célula de hora pura (epoch 30/12/1899) para HH:mm, e data normal continua dd/mm/aaaa", () => {
+  const { sandbox, spreadsheet } = criarAmbiente();
+
+  const headers = spreadsheet.sheets.Agendamentos.data[0];
+  const horarioIdx = headers.indexOf("horario_consulta");
+  const dataConsultaIdx = headers.indexOf("data_consulta");
+
+  // Célula de "só hora": o Sheets grava ancorada no epoch dele (30/12/1899).
+  spreadsheet.sheets.Agendamentos.data[1][horarioIdx] = new sandbox.Date(1899, 11, 30, 10, 0);
+  // Célula de data normal (ano > 1900), para confirmar que continua "dd/mm/aaaa".
+  spreadsheet.sheets.Agendamentos.data[1][dataConsultaIdx] = new sandbox.Date(2026, 7, 15);
+
+  const resp = chamarGet(sandbox, { action: "getAgendamentos" });
+  const agendamento1 = resp.data.find((a) => a.id === 1);
+
+  assert.equal(agendamento1.horario_consulta, "10:00"); // hora, não "30/12/1899"
+  assert.equal(agendamento1.data_consulta, "15/08/2026"); // data normal inalterada no formato
 });

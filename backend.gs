@@ -62,7 +62,11 @@ function sheetToJson(sheetName) {
     if (isRowEmpty(values[i])) continue;
     const row = {};
     for (let j = 0; j < headers.length; j++) {
-      row[headers[j]] = values[i][j];
+      const celula = values[i][j];
+      // Célula de data pode vir como objeto Date do Sheets (o JSON a
+      // serializaria em ISO); normaliza para "dd/mm/aaaa" antes de sair.
+      // Demais tipos de valor seguem inalterados.
+      row[headers[j]] = celula instanceof Date ? formatDataBR(celula) : celula;
     }
     data.push(row);
   }

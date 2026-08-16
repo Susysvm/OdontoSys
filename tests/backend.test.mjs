@@ -181,8 +181,20 @@ function criarAmbiente() {
   };
 
   const Utilities = {
-    formatDate() {
-      return "15/08/2026"; // data fixa simulando "hoje"
+    // Formata de verdade a Date recebida (não um valor fixo), para que a
+    // normalização de células Date em sheetToJson seja testável com
+    // qualquer data de fixture. hojeBR() chama isso com `new Date()`
+    // (o "agora" real da máquina de teste); no ambiente desta suíte
+    // "agora" cai em 15/08/2026, que é a data usada nas fixtures de
+    // agendamento "de hoje".
+    formatDate(date, timeZone, _pattern) {
+      const formatter = new Intl.DateTimeFormat("pt-BR", {
+        timeZone: timeZone || "America/Manaus",
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+      });
+      return formatter.format(date);
     }
   };
 
@@ -192,6 +204,15 @@ function criarAmbiente() {
 
   const sandbox = { SpreadsheetApp, ContentService, Utilities, Logger, console };
   vm.createContext(sandbox);
+
+  // Expõe o Date "de verdade" do realm do sandbox como propriedade própria:
+  // um vm.createContext cria um realm/global novo, então `new Date()` do
+  // Node hospedeiro NÃO é `instanceof` o `Date` visto de dentro do
+  // backend.gs (que roda nesse outro realm). Guardar a referência aqui
+  // permite que os testes construam objetos Date que passem no
+  // `instanceof Date` executado dentro do sandbox.
+  sandbox.Date = vm.runInContext("Date", sandbox);
+
   vm.runInContext(BACKEND_CODE, sandbox, { filename: "backend.gs" });
 
   return { sandbox, spreadsheet };
@@ -575,4 +596,29 @@ test("deleteAgendamento retorna erro para id inexistente", () => {
 
   assert.equal(resp.success, false);
   assert.ok(resp.error);
+});
+
+test("sheetToJson normaliza célula Date para dd/mm/aaaa (demais tipos inalterados)", () => {
+  const { sandbox, spreadsheet } = criarAmbiente();
+
+  const headers = spreadsheet.sheets.Pacientes.data[0];
+  const dataNascIdx = headers.indexOf("data_nascimento");
+
+  // Simula o Sheets devolvendo a célula como objeto Date real (não texto) —
+  // é o que o JSON.stringify serializaria como ISO ("1990-05-15T04:00:00.000Z")
+  // se não fosse normalizado antes. Precisa ser um Date do PRÓPRIO
+  // contexto vm (sandbox.Date), não o Date do processo Node hospedeiro:
+  // "instanceof Date" dentro do backend.gs roda no realm do sandbox, e um
+  // Date criado fora dele falharia esse instanceof (bug clássico de vm).
+  spreadsheet.sheets.Pacientes.data[1][dataNascIdx] = new sandbox.Date(sandbox.Date.UTC(1990, 4, 15, 4, 0, 0));
+
+  // Fim a fim, via doGet (é onde o bug apareceria no JSON de resposta)
+  const resp = chamarGet(sandbox, { action: "getPacientes" });
+  const paciente1 = resp.data.find((p) => p.id === 1);
+
+  assert.equal(paciente1.data_nascimento, "15/05/1990"); // normalizado, não ISO
+  // Demais tipos de valor da mesma linha seguem inalterados
+  assert.equal(paciente1.nome_completo, "Maria Silva");
+  assert.equal(paciente1.ativo, true);
+  assert.equal(typeof paciente1.id, "number");
 });

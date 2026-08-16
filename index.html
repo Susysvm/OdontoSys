@@ -958,18 +958,39 @@
             );
         }
 
+        // Desabilita todos os botões de ação da tabela enquanto uma requisição está em voo,
+        // evitando duplo clique / cliques simultâneos em outras linhas.
+        function travarBotoesAcaoAgendamentos() {
+            const botoes = document.querySelectorAll('#tabela-agendamentos-corpo button[data-action]');
+            botoes.forEach(b => {
+                b.disabled = true;
+                b.classList.add('opacity-50', 'cursor-not-allowed');
+            });
+            return botoes;
+        }
+
+        function destravarBotoesAcaoAgendamentos(botoes) {
+            botoes.forEach(b => {
+                b.disabled = false;
+                b.classList.remove('opacity-50', 'cursor-not-allowed');
+            });
+        }
+
         async function executarMudancaStatusAgendamento(id, novoStatus) {
+            const botoes = travarBotoesAcaoAgendamentos();
             try {
                 const resultado = await api.atualizarAgendamento(id, { status: novoStatus });
                 if (resultado.success) {
                     mostrarMensagemModal('Sucesso', `Agendamento atualizado para "${novoStatus}".`);
-                    await carregarAgendamentos(true);
+                    await carregarAgendamentos(true); // recarrega a tabela inteira com botões novos e destravados
                 } else {
                     mostrarMensagemModal('Erro', 'Não foi possível atualizar o agendamento: ' + (resultado.error || 'erro desconhecido.'));
+                    destravarBotoesAcaoAgendamentos(botoes);
                 }
             } catch (error) {
                 console.error('Erro ao atualizar status do agendamento:', error);
                 mostrarMensagemModal('Erro', 'Falha de comunicação com a API ao atualizar o agendamento.');
+                destravarBotoesAcaoAgendamentos(botoes);
             }
         }
 

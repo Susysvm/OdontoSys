@@ -230,19 +230,6 @@
                             >
                             <p class="text-xs text-gray-400 mt-1">Formato: XXXXX-XXX</p>
                         </div>
-
-                        <!-- Observações -->
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-300 mb-2">
-                                <i class="fa-solid fa-note-sticky mr-2 text-teal-400"></i>Observações
-                            </label>
-                            <textarea 
-                                id="obs" 
-                                placeholder="Informações adicionais do paciente..."
-                                rows="3"
-                                class="input-focus w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-gray-500 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 resize-none"
-                            ></textarea>
-                        </div>
                     </div>
 
                     <!-- Submit Button -->
@@ -407,8 +394,7 @@
                     endereco: document.getElementById('endereco').value.trim(),
                     cidade: document.getElementById('cidade').value.trim(),
                     estado: document.getElementById('estado').value,
-                    cep: document.getElementById('cep').value,
-                    obs: document.getElementById('obs').value.trim()
+                    cep: document.getElementById('cep').value
                 };
 
                 console.log('📤 Enviando dados:', dados);

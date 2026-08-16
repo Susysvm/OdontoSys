@@ -131,7 +131,7 @@
 
                     <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex items-center justify-between">
                         <div>
-                            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Receita do Mês</p>
+                            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Receita Total</p>
                             <h3 id="metric-receita" class="text-2xl font-bold text-gray-900 mt-1">R$ --</h3>
                             <span class="text-xs text-emerald-600 font-medium flex items-center mt-1"><i class="fa-solid fa-chart-line mr-1"></i> Fluxo de caixa</span>
                         </div>
@@ -836,7 +836,7 @@
         function atualizarStatusConexao(conectado) {
             const dot = document.getElementById('status-dot');
             const text = document.getElementById('status-text');
-            if (conectado || apiEndpoint) {
+            if (conectado) {
                 dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500';
                 text.innerText = 'API Google Conectada';
             } else {
@@ -1088,7 +1088,7 @@
                     tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-red-500">Erro ao carregar agendamentos: ${esc(resultado.error || 'desconhecido')}</td></tr>`;
                     return;
                 }
-                agendamentosCache = resultado.data || [];
+                agendamentosCache = (resultado.data || []).filter(a => a.ativo !== false);
                 agendamentosCarregados = true;
                 renderizarAgendamentosFiltrados();
             } catch (error) {
@@ -1114,12 +1114,25 @@
             return str === '' ? '-' : str;
         }
 
-        function classeStatusAgendamento(status) {
+        // Normaliza o status do agendamento para um dos valores canônicos conhecidos,
+        // tratando "Pendente" (vocabulário legado) como alias de "Agendado".
+        // Retorna null para status fora do vocabulário conhecido.
+        function normalizarStatusAgendamento(status) {
             const s = (status || '').toString().trim().toLowerCase();
+            if (s === 'pendente' || s === 'agendado') return 'agendado';
+            if (s === 'confirmado') return 'confirmado';
+            if (s === 'concluído' || s === 'concluido') return 'concluído';
+            if (s === 'cancelado') return 'cancelado';
+            return null;
+        }
+
+        function classeStatusAgendamento(status) {
+            const s = normalizarStatusAgendamento(status);
             if (s === 'confirmado') return 'bg-blue-50 text-blue-700 border-blue-200';
-            if (s === 'concluído' || s === 'concluido') return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+            if (s === 'concluído') return 'bg-emerald-50 text-emerald-700 border-emerald-200';
             if (s === 'cancelado') return 'bg-red-50 text-red-700 border-red-200';
-            return 'bg-amber-50 text-amber-700 border-amber-200'; // Agendado / padrão
+            if (s === 'agendado') return 'bg-amber-50 text-amber-700 border-amber-200';
+            return 'bg-gray-100 text-gray-500 border-gray-200'; // status desconhecido
         }
 
         // Timestamp para ordenação (mais próximos primeiro). Datas/horas inválidas vão para o final.
@@ -1154,7 +1167,7 @@
         }
 
         function acoesAgendamento(status, id) {
-            const s = (status || '').toString().trim().toLowerCase();
+            const s = normalizarStatusAgendamento(status);
             if (s === 'agendado') {
                 return `<button data-action="confirmar" data-id="${esc(id)}" class="bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition"><i class="fa-solid fa-check"></i> Confirmar</button>
                         <button data-action="cancelar" data-id="${esc(id)}" class="bg-red-50 hover:bg-red-100 text-red-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition"><i class="fa-solid fa-ban"></i> Cancelar</button>`;
@@ -1362,7 +1375,7 @@
                     tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-red-500">Erro ao carregar financeiro: ${esc(resultado.error || 'desconhecido')}</td></tr>`;
                     return;
                 }
-                financeiroCache = resultado.data || [];
+                financeiroCache = (resultado.data || []).filter(f => f.ativo !== false);
                 financeiroResumo = resultado.resumo || { totalReceber: 0, totalRecebido: 0 };
                 financeiroCarregado = true;
                 atualizarCardsFinanceiro();
@@ -1428,7 +1441,7 @@
                         <td class="p-3"><span class="px-2.5 py-1 rounded-full text-xs font-semibold border ${classeTipoFinanceiro(f.tipo_movimentacao)}">${esc(f.tipo_movimentacao || '-')}</span></td>
                         <td class="p-3 font-medium text-gray-800">${esc(f.descricao || '-')}</td>
                         <td class="p-3 text-gray-600">${esc(resolverNomePacienteFinanceiro(f.paciente_id))}</td>
-                        <td class="p-3 text-gray-600">${esc(f.valor_total || '-')}</td>
+                        <td class="p-3 text-gray-600">${esc(formatarValorAgendamento(f.valor_total))}</td>
                         <td class="p-3 text-gray-600">${esc(f.forma_pagamento || '-')}</td>
                         <td class="p-3"><span class="px-2.5 py-1 rounded-full text-xs font-semibold border ${classeStatusFinanceiro(status)}">${esc(status)}</span></td>
                         <td class="p-3 text-right space-x-2 whitespace-nowrap">${acao}</td>
@@ -1589,7 +1602,7 @@
                     tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-red-500">Erro ao carregar estoque: ${esc(resultado.error || 'desconhecido')}</td></tr>`;
                     return;
                 }
-                estoqueCache = resultado.data || [];
+                estoqueCache = (resultado.data || []).filter(i => i.ativo !== false);
                 estoqueCarregado = true;
                 renderizarEstoque(estoqueCache);
             } catch (error) {
@@ -1739,11 +1752,18 @@
                 return;
             }
 
+            const quantidade = Number(quantidadeInput);
+            const estoqueMinimo = Number(minimoInput);
+            if (isNaN(quantidade) || isNaN(estoqueMinimo) || quantidade < 0 || estoqueMinimo < 0) {
+                mostrarMensagemModal('Valor inválido', 'Quantidade e estoque mínimo não podem ser negativos.');
+                return;
+            }
+
             const payload = {
                 nome,
                 categoria,
-                quantidade: Number(quantidadeInput),
-                estoqueMinimo: Number(minimoInput),
+                quantidade,
+                estoqueMinimo,
                 lote
             };
             if (validadeISO) payload.validade = converterDataISOparaBR(validadeISO);

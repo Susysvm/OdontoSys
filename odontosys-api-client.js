@@ -140,10 +140,6 @@ class OdontoSysAPI {
     return this.post('addProntuario', anotacao);
   }
 
-  async atualizarAnotacaoProntuario(id, anotacao) {
-    return this.post('updateProntuario', { id, ...anotacao });
-  }
-
   // ==================== DASHBOARD ====================
 
   async obterDashboard() {
@@ -274,84 +270,6 @@ let api = null;
 function inicializarAPI(deploymentId) {
   api = new OdontoSysAPI(deploymentId);
   console.log('✅ API OdontoSys inicializada');
-}
-
-/**
- * Exemplo: Preencher tabela de pacientes
- */
-async function preencherTabelaPacientes(selectorTabela) {
-  try {
-    const resultado = await api.listarPacientes();
-    
-    if (!resultado.success) {
-      console.error('Erro ao obter pacientes:', resultado.error);
-      return;
-    }
-    
-    const tabela = document.querySelector(selectorTabela);
-    if (!tabela) return;
-    
-    const tbody = tabela.querySelector('tbody') || tabela;
-    tbody.innerHTML = '';
-    
-    resultado.data.forEach(paciente => {
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td>${paciente.Nome || '-'}</td>
-        <td>${OdontoSysAPI.mascaraCPF(paciente.CPF || '')}</td>
-        <td>${OdontoSysAPI.mascaraTelefone(paciente.Telefone || '')}</td>
-        <td>${paciente.Email || '-'}</td>
-        <td>${paciente.Status || '-'}</td>
-        <td>
-          <button onclick="editarPaciente('${paciente.ID}')">Editar</button>
-          <button onclick="deletarPacienteConfirm('${paciente.ID}')">Deletar</button>
-        </td>
-      `;
-      tbody.appendChild(row);
-    });
-  } catch (error) {
-    console.error('Erro ao preencher tabela:', error);
-  }
-}
-
-/**
- * Exemplo: Atualizar Dashboard
- */
-async function atualizarDashboard() {
-  try {
-    const resultado = await api.obterDashboard();
-    
-    if (!resultado.success) {
-      console.error('Erro ao obter dashboard:', resultado.error);
-      return;
-    }
-    
-    const resumo = resultado.resumo;
-    
-    document.getElementById('total-pacientes').textContent = resumo.totalPacientes || 0;
-    document.getElementById('agendamentos-hoje').textContent = resumo.agendamentosHoje || 0;
-    document.getElementById('total-receber').textContent = OdontoSysAPI.formatarMoeda(resumo.totalReceber || 0);
-    document.getElementById('total-recebido').textContent = OdontoSysAPI.formatarMoeda(resumo.totalRecebido || 0);
-    document.getElementById('items-baixo-estoque').textContent = resumo.itensBaixoEstoque || 0;
-  } catch (error) {
-    console.error('Erro ao atualizar dashboard:', error);
-  }
-}
-
-/**
- * Exemplo: Deletar paciente com confirmação
- */
-async function deletarPacienteConfirm(id) {
-  if (confirm('Tem certeza que deseja deletar este paciente?')) {
-    const resultado = await api.deletarPaciente(id);
-    
-    if (resultado.success) {
-      alert('✅ Paciente deletado com sucesso');
-      preencherTabelaPacientes('table');
-    } else {
-      alert('❌ Erro: ' + resultado.error);
-    }
-  }
 }
 
 // Export para usar em módulos

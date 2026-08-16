@@ -240,14 +240,49 @@
                         <h2 class="text-2xl font-bold text-gray-900">Módulo de Agendamentos</h2>
                         <p class="text-sm text-gray-500">Controle de horários, procedimentos e status de consultas.</p>
                     </div>
-                    <button onclick="mostrarMensagemModal('Agenda', 'Visualização de agendamentos sincronizada com o banco de dados.')" class="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition shadow-sm flex items-center space-x-2">
+                    <button id="btn-novo-agendamento" onclick="abrirNovoAgendamentoModal()" class="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition shadow-sm flex items-center space-x-2">
                         <i class="fa-solid fa-calendar-plus"></i>
                         <span>Novo Agendamento</span>
                     </button>
                 </div>
-                <div class="bg-white rounded-2xl border border-gray-200 p-8 text-center text-gray-500">
-                    <i class="fa-solid fa-calendar-days text-4xl text-gray-300 mb-3"></i>
-                    <p class="font-medium">Carregamento da aba "Agendamentos" pronto.</p>
+                <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-gray-50/50">
+                        <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                            <select id="agendamentos-filtro-status" onchange="filtrarAgendamentos()" class="px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                <option value="">Todos os status</option>
+                                <option value="Agendado">Agendado</option>
+                                <option value="Confirmado">Confirmado</option>
+                                <option value="Concluído">Concluído</option>
+                                <option value="Cancelado">Cancelado</option>
+                            </select>
+                            <input type="date" id="agendamentos-filtro-data" onchange="filtrarAgendamentos()" class="px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        </div>
+                        <button onclick="carregarAgendamentos(true)" class="bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 font-semibold px-3.5 py-2 rounded-xl text-sm transition flex items-center space-x-2 shrink-0">
+                            <i class="fa-solid fa-rotate"></i>
+                            <span>Recarregar</span>
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-100 text-gray-600 text-xs font-bold uppercase tracking-wider">
+                                    <th class="p-3">Data</th>
+                                    <th class="p-3">Hora</th>
+                                    <th class="p-3">Paciente</th>
+                                    <th class="p-3">Dentista</th>
+                                    <th class="p-3">Procedimento</th>
+                                    <th class="p-3">Valor</th>
+                                    <th class="p-3">Status</th>
+                                    <th class="p-3 text-right">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-agendamentos-corpo" class="text-sm divide-y divide-gray-100">
+                                <tr>
+                                    <td colspan="8" class="p-6 text-center text-gray-400 italic">Abra esta aba para carregar os agendamentos.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -381,6 +416,62 @@
         </div>
     </div>
 
+    <!-- Modal Novo Agendamento -->
+    <div id="novo-agendamento-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-gray-100 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-900 flex items-center space-x-2">
+                    <i class="fa-solid fa-calendar-plus text-teal-600"></i>
+                    <span>Novo Agendamento</span>
+                </h3>
+                <button onclick="closeNovoAgendamentoModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Paciente</label>
+                    <select id="novo-ag-paciente" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        <option value="">Selecione o paciente...</option>
+                    </select>
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Dentista</label>
+                    <select id="novo-ag-dentista" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        <option value="">Selecione o dentista...</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Categoria</label>
+                    <select id="novo-ag-categoria" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        <option value="Avaliação">Avaliação</option>
+                        <option value="Tratamento">Tratamento</option>
+                        <option value="Retorno">Retorno</option>
+                        <option value="Urgência">Urgência</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Valor (opcional)</label>
+                    <input type="number" step="0.01" min="0" id="novo-ag-valor" placeholder="0,00" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Procedimento</label>
+                    <input type="text" id="novo-ag-procedimento" placeholder="Ex: Clareamento Dental" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Data</label>
+                    <input type="date" id="novo-ag-data" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Hora</label>
+                    <input type="time" id="novo-ag-hora" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                </div>
+            </div>
+            <div class="flex justify-end space-x-3 pt-2">
+                <button onclick="closeNovoAgendamentoModal()" class="px-4 py-2 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-100 transition">Cancelar</button>
+                <button id="btn-salvar-novo-agendamento" onclick="salvarNovoAgendamento()" class="px-5 py-2 rounded-xl text-sm font-semibold bg-teal-600 hover:bg-teal-700 text-white transition shadow-sm">Salvar Agendamento</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal de Confirmação de Ação (Sem usar confirm() nativo) -->
     <div id="confirmar-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-gray-100 text-center space-y-4">
@@ -428,6 +519,8 @@
 
             if (tabId === 'pacientes') {
                 carregarPacientes(false);
+            } else if (tabId === 'agendamentos') {
+                carregarAgendamentos(false);
             }
         }
 
@@ -700,6 +793,276 @@
                 const cb = confirmarModalCallback;
                 confirmarModalCallback = null;
                 cb();
+            }
+        }
+
+        // ==================== MÓDULO AGENDAMENTOS ====================
+        let agendamentosCache = [];
+        let agendamentosCarregados = false;
+        let usuariosCache = [];
+        let usuariosCarregados = false;
+
+        async function carregarUsuarios(forcar) {
+            if (usuariosCarregados && !forcar) return;
+            try {
+                const resultado = await api.get('getUsuarios');
+                if (resultado.success) {
+                    usuariosCache = resultado.data || [];
+                    usuariosCarregados = true;
+                } else {
+                    console.error('Erro ao carregar usuários/dentistas:', resultado.error);
+                }
+            } catch (error) {
+                console.error('Erro ao carregar usuários/dentistas:', error);
+            }
+        }
+
+        async function carregarAgendamentos(forcar) {
+            const tbody = document.getElementById('tabela-agendamentos-corpo');
+            if (agendamentosCarregados && !forcar) {
+                renderizarAgendamentosFiltrados();
+                return;
+            }
+            tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-gray-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Carregando agendamentos...</td></tr>`;
+            try {
+                const [resultado] = await Promise.all([
+                    api.listarAgendamentos(),
+                    carregarPacientes(false),
+                    carregarUsuarios(false)
+                ]);
+                if (!resultado.success) {
+                    tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-red-500">Erro ao carregar agendamentos: ${esc(resultado.error || 'desconhecido')}</td></tr>`;
+                    return;
+                }
+                agendamentosCache = resultado.data || [];
+                agendamentosCarregados = true;
+                renderizarAgendamentosFiltrados();
+            } catch (error) {
+                console.error('Erro ao carregar agendamentos:', error);
+                tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-red-500">Erro ao carregar agendamentos. Verifique a conexão com a API.</td></tr>`;
+            }
+        }
+
+        function resolverNomePaciente(id) {
+            const p = pacientesCache.find(x => String(x.id) === String(id));
+            return p ? (p.nome_completo || `#${id}`) : `#${id}`;
+        }
+
+        function resolverNomeDentista(id) {
+            const u = usuariosCache.find(x => String(x.id) === String(id));
+            return u ? (u.nome || `#${id}`) : `#${id}`;
+        }
+
+        function formatarValorAgendamento(valor) {
+            if (valor === null || valor === undefined || valor === '') return '-';
+            if (typeof valor === 'number') return OdontoSysAPI.formatarMoeda(valor);
+            const str = String(valor).trim();
+            return str === '' ? '-' : str;
+        }
+
+        function classeStatusAgendamento(status) {
+            const s = (status || '').toString().trim().toLowerCase();
+            if (s === 'confirmado') return 'bg-blue-50 text-blue-700 border-blue-200';
+            if (s === 'concluído' || s === 'concluido') return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+            if (s === 'cancelado') return 'bg-red-50 text-red-700 border-red-200';
+            return 'bg-amber-50 text-amber-700 border-amber-200'; // Agendado / padrão
+        }
+
+        // Timestamp para ordenação (mais próximos primeiro). Datas/horas inválidas vão para o final.
+        function timestampAgendamento(a) {
+            const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(a.data_consulta || '');
+            if (!m) return Infinity;
+            const hm = /^(\d{1,2}):(\d{2})/.exec(a.horario_consulta || '');
+            const hh = hm ? parseInt(hm[1], 10) : 0;
+            const min = hm ? parseInt(hm[2], 10) : 0;
+            const dt = new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]), hh, min);
+            return dt.getTime();
+        }
+
+        function filtrarAgendamentos() {
+            renderizarAgendamentosFiltrados();
+        }
+
+        function renderizarAgendamentosFiltrados() {
+            const statusFiltro = document.getElementById('agendamentos-filtro-status').value;
+            const dataFiltroISO = document.getElementById('agendamentos-filtro-data').value; // yyyy-mm-dd
+            const dataFiltroBR = dataFiltroISO ? converterDataISOparaBR(dataFiltroISO) : '';
+
+            let lista = agendamentosCache.slice();
+            if (statusFiltro) {
+                lista = lista.filter(a => (a.status || 'Agendado') === statusFiltro);
+            }
+            if (dataFiltroBR) {
+                lista = lista.filter(a => (a.data_consulta || '') === dataFiltroBR);
+            }
+            lista.sort((a, b) => timestampAgendamento(a) - timestampAgendamento(b));
+            renderizarAgendamentos(lista);
+        }
+
+        function acoesAgendamento(status, id) {
+            const s = (status || '').toString().trim().toLowerCase();
+            if (s === 'agendado') {
+                return `<button data-action="confirmar" data-id="${esc(id)}" class="bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition"><i class="fa-solid fa-check"></i> Confirmar</button>
+                        <button data-action="cancelar" data-id="${esc(id)}" class="bg-red-50 hover:bg-red-100 text-red-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition"><i class="fa-solid fa-ban"></i> Cancelar</button>`;
+            }
+            if (s === 'confirmado') {
+                return `<button data-action="concluir" data-id="${esc(id)}" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition"><i class="fa-solid fa-check-double"></i> Concluir</button>
+                        <button data-action="cancelar" data-id="${esc(id)}" class="bg-red-50 hover:bg-red-100 text-red-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition"><i class="fa-solid fa-ban"></i> Cancelar</button>`;
+            }
+            return '<span class="text-gray-400 text-xs italic">—</span>';
+        }
+
+        function renderizarAgendamentos(lista) {
+            const tbody = document.getElementById('tabela-agendamentos-corpo');
+            if (!lista || lista.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-gray-400 italic">Nenhum agendamento encontrado.</td></tr>`;
+                return;
+            }
+            let html = '';
+            lista.forEach(a => {
+                const status = a.status || 'Agendado';
+                html += `
+                    <tr class="hover:bg-gray-50/80 transition">
+                        <td class="p-3 text-gray-600">${esc(a.data_consulta || '-')}</td>
+                        <td class="p-3 text-gray-600">${esc(a.horario_consulta || '-')}</td>
+                        <td class="p-3 font-medium text-gray-800">${esc(resolverNomePaciente(a.paciente_id))}</td>
+                        <td class="p-3 text-gray-600">${esc(resolverNomeDentista(a.dentista_id))}</td>
+                        <td class="p-3 text-gray-600">${esc(a.procedimento || '-')}</td>
+                        <td class="p-3 text-gray-600">${esc(formatarValorAgendamento(a.valor))}</td>
+                        <td class="p-3"><span class="px-2.5 py-1 rounded-full text-xs font-semibold border ${classeStatusAgendamento(status)}">${esc(status)}</span></td>
+                        <td class="p-3 text-right space-x-2 whitespace-nowrap">${acoesAgendamento(status, a.id)}</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        // Delegação de evento: nunca interpolar dados da planilha em atributos onclick
+        document.getElementById('tabela-agendamentos-corpo').addEventListener('click', function (e) {
+            const btn = e.target.closest('button[data-action]');
+            if (!btn || !this.contains(btn)) return;
+            const id = btn.dataset.id;
+            const action = btn.dataset.action;
+            if (action === 'confirmar') executarMudancaStatusAgendamento(id, 'Confirmado');
+            else if (action === 'concluir') executarMudancaStatusAgendamento(id, 'Concluído');
+            else if (action === 'cancelar') confirmarCancelarAgendamento(id);
+        });
+
+        function confirmarCancelarAgendamento(id) {
+            const a = agendamentosCache.find(x => String(x.id) === String(id));
+            const desc = a ? `${a.procedimento || 'Agendamento'} de ${resolverNomePaciente(a.paciente_id)} em ${a.data_consulta || '-'}` : 'este agendamento';
+            abrirConfirmarModal(
+                'Cancelar agendamento',
+                `Tem certeza que deseja cancelar "${desc}"?`,
+                () => executarMudancaStatusAgendamento(id, 'Cancelado')
+            );
+        }
+
+        async function executarMudancaStatusAgendamento(id, novoStatus) {
+            try {
+                const resultado = await api.atualizarAgendamento(id, { status: novoStatus });
+                if (resultado.success) {
+                    mostrarMensagemModal('Sucesso', `Agendamento atualizado para "${novoStatus}".`);
+                    await carregarAgendamentos(true);
+                } else {
+                    mostrarMensagemModal('Erro', 'Não foi possível atualizar o agendamento: ' + (resultado.error || 'erro desconhecido.'));
+                }
+            } catch (error) {
+                console.error('Erro ao atualizar status do agendamento:', error);
+                mostrarMensagemModal('Erro', 'Falha de comunicação com a API ao atualizar o agendamento.');
+            }
+        }
+
+        function converterDataISOparaBR(iso) {
+            const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+            if (!m) return iso || '';
+            return `${m[3]}/${m[2]}/${m[1]}`;
+        }
+
+        function preencherSelectPacientesAgendamento() {
+            const sel = document.getElementById('novo-ag-paciente');
+            const ativos = pacientesCache.filter(pacienteAtivo);
+            sel.innerHTML = '<option value="">Selecione o paciente...</option>' +
+                ativos.map(p => `<option value="${esc(p.id)}">${esc(p.nome_completo || '-')}</option>`).join('');
+        }
+
+        function preencherSelectDentistas() {
+            const sel = document.getElementById('novo-ag-dentista');
+            sel.innerHTML = '<option value="">Selecione o dentista...</option>' +
+                usuariosCache.map(u => `<option value="${esc(u.id)}">${esc(u.nome || '-')}</option>`).join('');
+        }
+
+        async function abrirNovoAgendamentoModal() {
+            const btn = document.getElementById('btn-novo-agendamento');
+            const textoOriginal = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Carregando...</span>';
+            try {
+                await Promise.all([carregarPacientes(false), carregarUsuarios(false)]);
+                preencherSelectPacientesAgendamento();
+                preencherSelectDentistas();
+                document.getElementById('novo-ag-categoria').value = 'Avaliação';
+                document.getElementById('novo-ag-procedimento').value = '';
+                document.getElementById('novo-ag-data').value = '';
+                document.getElementById('novo-ag-hora').value = '';
+                document.getElementById('novo-ag-valor').value = '';
+                document.getElementById('novo-agendamento-modal').classList.remove('hidden');
+            } catch (error) {
+                console.error('Erro ao preparar formulário de agendamento:', error);
+                mostrarMensagemModal('Erro', 'Não foi possível carregar pacientes/dentistas para o formulário.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = textoOriginal;
+            }
+        }
+
+        function closeNovoAgendamentoModal() {
+            document.getElementById('novo-agendamento-modal').classList.add('hidden');
+        }
+
+        async function salvarNovoAgendamento() {
+            const pacienteId = document.getElementById('novo-ag-paciente').value;
+            const dentistaId = document.getElementById('novo-ag-dentista').value;
+            const categoria = document.getElementById('novo-ag-categoria').value;
+            const procedimento = document.getElementById('novo-ag-procedimento').value.trim();
+            const dataISO = document.getElementById('novo-ag-data').value;
+            const hora = document.getElementById('novo-ag-hora').value;
+            const valorInput = document.getElementById('novo-ag-valor').value;
+
+            if (!pacienteId || !dentistaId || !categoria || !procedimento || !dataISO || !hora) {
+                mostrarMensagemModal('Campos obrigatórios', 'Preencha paciente, dentista, categoria, procedimento, data e hora.');
+                return;
+            }
+
+            const payload = {
+                pacienteId,
+                dentistaId,
+                categoria,
+                procedimento,
+                data: converterDataISOparaBR(dataISO),
+                hora
+            };
+            if (valorInput !== '') payload.valor = Number(valorInput);
+
+            const btn = document.getElementById('btn-salvar-novo-agendamento');
+            btn.disabled = true;
+            const textoOriginal = btn.innerText;
+            btn.innerText = 'Salvando...';
+            try {
+                const resultado = await api.adicionarAgendamento(payload);
+                if (resultado.success) {
+                    closeNovoAgendamentoModal();
+                    mostrarMensagemModal('Sucesso', 'Agendamento criado com sucesso.');
+                    await carregarAgendamentos(true);
+                } else {
+                    mostrarMensagemModal('Erro ao salvar', 'Não foi possível criar o agendamento: ' + (resultado.error || 'erro desconhecido.'));
+                }
+            } catch (error) {
+                console.error('Erro ao salvar agendamento:', error);
+                mostrarMensagemModal('Erro ao salvar', 'Falha de comunicação com a API ao salvar o agendamento.');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = textoOriginal;
             }
         }
 

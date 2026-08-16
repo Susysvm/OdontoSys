@@ -207,6 +207,21 @@ function chamarPost(sandbox, corpo) {
   return JSON.parse(resultado.getContent());
 }
 
+/**
+ * Lê uma linha da planilha fake pelo id (coluna "id") e devolve como objeto
+ * { header: valor }, para inspecionar exatamente o que ficou gravado.
+ */
+function lerLinhaPorId(spreadsheet, aba, id) {
+  const dados = spreadsheet.sheets[aba].data;
+  const headers = dados[0];
+  const idIdx = headers.indexOf("id");
+  const linha = dados.find((r) => r[idIdx] === id);
+  if (!linha) return null;
+  const obj = {};
+  headers.forEach((h, i) => (obj[h] = linha[i]));
+  return obj;
+}
+
 // ==================== TESTES ====================
 
 test("addAgendamento grava linha com colunas certas e id sequencial", () => {
@@ -397,4 +412,167 @@ test("getFinanceiro retorna resumo correto com Receita e Despesa misturadas", ()
   assert.equal(resp.data.length, 4); // as 4 linhas não-vazias da aba
   assert.equal(resp.resumo.totalRecebido, 450); // Receita Recebido(350) + Receita Pago(100); Despesa ignorada
   assert.equal(resp.resumo.totalReceber, 200); // Receita Pendente(200)
+});
+
+// ==================== TESTES - UPDATE/DELETE (regressão) ====================
+
+test("updatePaciente altera só as células enviadas e mapeia as chaves certas", () => {
+  const { sandbox, spreadsheet } = criarAmbiente();
+
+  const resp = chamarPost(sandbox, {
+    action: "updatePaciente",
+    id: 1,
+    telefone: "92988887777",
+    email: "maria.nova@x.com"
+  });
+
+  assert.equal(resp.success, true);
+
+  const linha = lerLinhaPorId(spreadsheet, "Pacientes", 1);
+  // Campos enviados: mapeados para as colunas reais
+  assert.equal(linha.celular, "92988887777");
+  assert.equal(linha.email, "maria.nova@x.com");
+  // Campos NÃO enviados: preservados (update parcial não zera o resto)
+  assert.equal(linha.nome_completo, "Maria Silva");
+  assert.equal(linha.cpf, "111.111.111-11");
+  assert.equal(linha.data_nascimento, "01/01/1990");
+  assert.equal(linha.endereco_completo, "Rua A, 1");
+  assert.equal(linha.status_lgpd, "Pendente");
+  assert.equal(linha.ativo, true);
+});
+
+test("updatePaciente retorna erro para id inexistente", () => {
+  const { sandbox } = criarAmbiente();
+
+  const resp = chamarPost(sandbox, { action: "updatePaciente", id: 9999, nome: "Fulano" });
+
+  assert.equal(resp.success, false);
+  assert.ok(resp.error);
+});
+
+test("updateAgendamento altera só as células enviadas e mapeia as chaves certas", () => {
+  const { sandbox, spreadsheet } = criarAmbiente();
+
+  const resp = chamarPost(sandbox, {
+    action: "updateAgendamento",
+    id: 1,
+    status: "Concluído",
+    valor: 180
+  });
+
+  assert.equal(resp.success, true);
+
+  const linha = lerLinhaPorId(spreadsheet, "Agendamentos", 1);
+  // Campos enviados: mapeados para as colunas reais (valor formatado pt-BR)
+  assert.equal(linha.status, "Concluído");
+  assert.equal(linha.valor, "R$ 180,00");
+  // Campos NÃO enviados: preservados
+  assert.equal(linha.paciente_id, 1);
+  assert.equal(linha.dentista_id, 1);
+  assert.equal(linha.categoria, "Consulta");
+  assert.equal(linha.procedimento, "Avaliação");
+  assert.equal(linha.data_consulta, "15/08/2026");
+  assert.equal(linha.horario_consulta, "09:00");
+  assert.equal(linha.ativo, true);
+});
+
+test("updateAgendamento retorna erro para id inexistente", () => {
+  const { sandbox } = criarAmbiente();
+
+  const resp = chamarPost(sandbox, { action: "updateAgendamento", id: 9999, status: "Concluído" });
+
+  assert.equal(resp.success, false);
+  assert.ok(resp.error);
+});
+
+test("updateFinanceiro altera só as células enviadas e mapeia as chaves certas", () => {
+  const { sandbox, spreadsheet } = criarAmbiente();
+
+  const resp = chamarPost(sandbox, {
+    action: "updateFinanceiro",
+    id: 1,
+    formaPagamento: "Cartão",
+    status: "Cancelado"
+  });
+
+  assert.equal(resp.success, true);
+
+  const linha = lerLinhaPorId(spreadsheet, "Financeiro", 1);
+  // Campos enviados: mapeados para as colunas reais
+  assert.equal(linha.forma_pagamento, "Cartão");
+  assert.equal(linha.status_pagamento, "Cancelado");
+  // Campos NÃO enviados: preservados
+  assert.equal(linha.paciente_id, 1);
+  assert.equal(linha.tipo_movimentacao, "Receita");
+  assert.equal(linha.descricao, "Consulta");
+  assert.equal(linha.data_vencimento, "10/08/2026");
+  assert.equal(linha.valor_total, "R$ 350,00");
+  assert.equal(linha.nota_fiscal_url, "");
+  assert.equal(linha.ativo, true);
+});
+
+test("updateFinanceiro retorna erro para id inexistente", () => {
+  const { sandbox } = criarAmbiente();
+
+  const resp = chamarPost(sandbox, { action: "updateFinanceiro", id: 9999, status: "Recebido" });
+
+  assert.equal(resp.success, false);
+  assert.ok(resp.error);
+});
+
+test("updateEstoque altera só as células enviadas e mapeia as chaves certas", () => {
+  const { sandbox, spreadsheet } = criarAmbiente();
+
+  const resp = chamarPost(sandbox, {
+    action: "updateEstoque",
+    id: 1,
+    quantidade: 50
+  });
+
+  assert.equal(resp.success, true);
+
+  const linha = lerLinhaPorId(spreadsheet, "Estoque", 1);
+  // Campo enviado: mapeado para a coluna real
+  assert.equal(linha.quantidade_atual, 50);
+  // Campos NÃO enviados: preservados
+  assert.equal(linha.nome_produto, "Luva");
+  assert.equal(linha.categoria_produto, "Descartável");
+  assert.equal(linha.estoque_minimo, 10);
+  assert.equal(linha.data_validade, "01/12/2026");
+  assert.equal(linha.lote, "L1");
+  assert.equal(linha.ativo, true);
+});
+
+test("updateEstoque retorna erro para id inexistente", () => {
+  const { sandbox } = criarAmbiente();
+
+  const resp = chamarPost(sandbox, { action: "updateEstoque", id: 9999, quantidade: 1 });
+
+  assert.equal(resp.success, false);
+  assert.ok(resp.error);
+});
+
+test("deleteAgendamento marca ativo=false sem remover a linha", () => {
+  const { sandbox, spreadsheet } = criarAmbiente();
+
+  const linhasAntes = spreadsheet.sheets.Agendamentos.data.length;
+  const resp = chamarPost(sandbox, { action: "deleteAgendamento", id: 1 });
+
+  assert.equal(resp.success, true);
+  assert.equal(spreadsheet.sheets.Agendamentos.data.length, linhasAntes); // nenhuma linha removida
+
+  const linha = lerLinhaPorId(spreadsheet, "Agendamentos", 1);
+  assert.equal(linha.ativo, false);
+  // Resto da linha preservado
+  assert.equal(linha.paciente_id, 1);
+  assert.equal(linha.status, "Agendado");
+});
+
+test("deleteAgendamento retorna erro para id inexistente", () => {
+  const { sandbox } = criarAmbiente();
+
+  const resp = chamarPost(sandbox, { action: "deleteAgendamento", id: 9999 });
+
+  assert.equal(resp.success, false);
+  assert.ok(resp.error);
 });
